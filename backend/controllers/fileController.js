@@ -97,4 +97,25 @@ const getFilesInFolder = async (req, res) => {
         res.status(500).json({ message: 'Error fetching files', error });
     }
 };
-module.exports = { uploadFile, getFiles,deleteFile , getRootFolders, getFilesInFolder  };
+
+// Handle folder creation
+const createFolder = async (req, res) => {
+    const { folderName } = req.body; // Get folder name from the request body
+
+    if (!folderName) {
+        return res.status(400).json({ message: 'Folder name is required' });
+    }
+
+    try {
+        // Cloudinary doesn't explicitly create folders, but it can be created by uploading a dummy image
+        const response = await cloudinary.uploader.upload('data:image/gif;base64,R0lGODdhAQABAPAAAP8AAAAAACwAAAAAAQABAAACAkQBADs=', {
+            folder: `file-manager/${folderName}`,
+        });
+
+        // Return success response
+        res.status(201).json({ message: 'Folder created successfully' });
+    } catch (error) {
+        res.status(500).json({ message: 'Error creating folder', error });
+    }
+};
+module.exports = { uploadFile, getFiles,deleteFile , getRootFolders, getFilesInFolder ,createFolder  };

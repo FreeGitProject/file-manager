@@ -1,7 +1,7 @@
 // backend/routes/fileRoutes.js
 
 const express = require('express');
-const { uploadFile, getFiles, deleteFile, getFilesInFolder, getRootFolders } = require('../controllers/fileController');
+const { uploadFile, getFiles, deleteFile, getFilesInFolder, getRootFolders, createFolder } = require('../controllers/fileController');
 const multer = require('multer');
 const { storage } = require('../config/cloudinary');
 
@@ -18,5 +18,5 @@ router.delete('/:public_id', deleteFile); // <-- New route for deleting a file b
 router.get('/folders', getRootFolders); // New route for fetching folders
 router.get('/files/folder/:folderName', getFilesInFolder); // New route for fetching files in a folder
 
-
+router.post('/folders', createFolder); // New route for creating folders
 module.exports = router;

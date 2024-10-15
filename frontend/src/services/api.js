@@ -57,3 +57,7 @@ export const getFilesInFolder = async (folderName) => {
     const response = await axios.get(`${API_BASE_URL}/files/folder/${folderName}`);
     return response.data;
 };
+export const createFolder = async (folderName) => {
+    const response = await axios.post(`${API_BASE_URL}/folders`, { folderName });
+    return response.data;
+};
