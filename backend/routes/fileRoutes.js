@@ -1,7 +1,7 @@
 // backend/routes/fileRoutes.js
 
 const express = require('express');
-const { uploadFile, getFiles, deleteFile, getFilesInFolder, getRootFolders, createFolder } = require('../controllers/fileController');
+const { uploadFile, getFiles, deleteFile, getFilesInFolder, getRootFolders, createFolder, getSubFolders, deleteFolder, getResourcesByFolderPath, getResourcesByExternalId } = require('../controllers/fileController');
 const multer = require('multer');
 const { storage } = require('../config/cloudinary');
 
@@ -15,8 +15,20 @@ router.post('/upload', upload.single('file'), uploadFile);
 router.get('/', getFiles);
 // Delete file route
 router.delete('/:public_id', deleteFile); // <-- New route for deleting a file by public ID
-router.get('/folders', getRootFolders); // New route for fetching folders
+// Define the route for fetching root folders
+router.get('/folders', getRootFolders);
 router.get('/files/folder/:folderName', getFilesInFolder); // New route for fetching files in a folder
+// Define the route for fetching subfolders of a specified parent folder
+router.get('/folders/:folder', getSubFolders);
+//router.post('/folders', createFolder); // New route for creating folders
+// Route for creating a new folder
+router.post('/folders', createFolder);
 
-router.post('/folders', createFolder); // New route for creating folders
+// Route for deleting a folder
+router.delete('/folders', deleteFolder);
+
+// Route for getting resources by folder_id
+router.get('/resources', getResourcesByFolderPath);
+// Route for getting resources by external_id
+router.get('/resources/by-external-id', getResourcesByExternalId);
 module.exports = router;
