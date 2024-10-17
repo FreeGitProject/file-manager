@@ -26,6 +26,18 @@ const FolderTree = ({ onSelectFolder }) => {
     // Call onSelectFolder when a folder is clicked
     onSelectFolder(folderPath);
   };
+  //If you want to call onSelectFolder only when expanding the folder, you can modify the toggleFolder function:
+//   const toggleFolder = async (folderPath) => {
+//     if (!expandedFolders[folderPath]) {
+//       const subFolders = await getSubFolders(folderPath);
+//       setExpandedFolders({ ...expandedFolders, [folderPath]: subFolders });
+      
+//       // Call onSelectFolder when a folder is expanded
+//       onSelectFolder(folderPath);
+//     } else {
+//       setExpandedFolders({ ...expandedFolders, [folderPath]: null });
+//     }
+// };
 
   const renderFolders = (folderList, parentPath = '') => (
     folderList.map(folder => (
