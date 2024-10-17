@@ -31,6 +31,6 @@ export const createFolder = async (folderName) => {
 
 // Delete a folder
 export const deleteFolder = async (folderPath) => {
-  const response = await axios.post(`${API_BASE_URL}/deleteFolder`, { folder: folderPath });
+  const response = await axios.delete(`${API_BASE_URL}/deleteFolder`, { params:{folder: folderPath} });
   return response.data;
 };

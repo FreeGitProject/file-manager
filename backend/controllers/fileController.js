@@ -220,7 +220,8 @@ const getSubFolders = async (req, res) => {
     }
 };
 const deleteFolder = async (req, res) => {
-    const { folder } = req.body; // Get folder name from the request body
+    //const { folder } = req.body; // Get folder name from the request body
+    const { folder } = req.query;
     try {
          // Ensure the folder name is provided
          if (!folder) {
