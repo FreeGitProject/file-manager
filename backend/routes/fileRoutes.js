@@ -10,25 +10,24 @@ const upload = multer({ storage });
 
 // Route to upload a file
 router.post('/upload', upload.single('file'), uploadFile);
-
 // Route to get the list of uploaded files
 router.get('/', getFiles);
 // Delete file route
 //router.delete('/:public_id', deleteFile); // <-- New route for deleting a file by public ID
+
+router.get('/files/folder/:folderName', getFilesInFolder); // New route for fetching files in a folder
 // Define the route for fetching root folders
 router.get('/getRootFolders', getRootFolders);
-router.get('/files/folder/:folderName', getFilesInFolder); // New route for fetching files in a folder
 // Define the route for fetching subfolders of a specified parent folder
 router.get('/getSubFolders', getSubFolders);
 //router.post('/folders', createFolder); // New route for creating folders
 // Route for creating a new folder
 router.post('/createFolder', createFolder);
-
 // Route for deleting a folder
 router.delete('/deleteFolder', deleteFolder);
-
 // Route for getting resources by folder_id
 router.get('/getResourcesByFolderPath', getResourcesByFolderPath);
+
 // Route for getting resources by external_id
 router.get('/resources/by-external-id', getResourcesByExternalId);
 module.exports = router;
