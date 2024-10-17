@@ -1,63 +1,63 @@
-// frontend/src/services/api.js
-
 import axios from 'axios';
 
 // Define the base URL for the API
-const API_BASE_URL = 'http://localhost:5000/api/files';
+const API_BASE_URL = 'http://localhost:5000/api/folders';
 
-// Function to upload a file
-export const uploadFile = async (file,onUploadProgress) => {
-    const formData = new FormData();
-    formData.append('file', file);
-    
-    try {
-        const response = await axios.post(`${API_BASE_URL}/upload`, formData, {
-            headers: {
-                'Content-Type': 'multipart/form-data',
-            },
-            onUploadProgress, // Pass the onUploadProgress callback
-        });
-        return response.data; // Return the response from the API
-    } catch (error) {
-        console.error('Error uploading file:', error);
-        throw error;
-    }
-};
-
-// Function to fetch the list of files
-export const fetchFiles = async () => {
-    try {
-        const response = await axios.get(API_BASE_URL);
-        return response.data; // Return the list of files
-    } catch (error) {
-        console.error('Error fetching files:', error);
-        throw error;
-    }
-};
-
-// frontend/src/services/api.js
-
-// Function to delete a file by its public_id
-export const deleteFile = async (publicId) => {
-    try {
-        const response = await axios.delete(`${API_BASE_URL}/${publicId}`);
-        return response.data;
-    } catch (error) {
-        console.error('Error deleting file:', error);
-        throw error;
-    }
-};
-
+// Function to get all root folders
 export const getRootFolders = async () => {
-    const response = await axios.get(`${API_BASE_URL}/folders`);
-    return response.data;
+    try {
+        const response = await axios.get(`${API_BASE_URL}`);
+        return response.data; // Return root folders
+    } catch (error) {
+        console.error('Error fetching root folders:', error);
+        throw error;
+    }
 };
 
-export const getFilesInFolder = async (folderName) => {
-    const response = await axios.get(`${API_BASE_URL}/files/folder/${folderName}`);
-    return response.data;
+// Function to get all subfolders for a specific folder
+export const getSubFolders = async (folder, max_results = 10, next_cursor = '') => {
+    try {
+        const response = await axios.get(`${API_BASE_URL}/${folder}`, {
+            params: { max_results, next_cursor }
+        });
+        return response.data; // Return subfolders with pagination support
+    } catch (error) {
+        console.error('Error fetching subfolders:', error);
+        throw error;
+    }
 };
+
+// Function to create a new folder
 export const createFolder = async (folderName) => {
-    const response = await axios.post(`${API_BASE_URL}/folders`, { folderName });
-    return response.data;
+    try {
+        const response = await axios.post(`${API_BASE_URL}`, { folder: folderName });
+        return response.data; // Return success response
+    } catch (error) {
+        console.error('Error creating folder:', error);
+        throw error;
+    }
+};
+
+// Function to delete a folder
+export const deleteFolder = async (folderName) => {
+    try {
+        const response = await axios.delete(`${API_BASE_URL}`, { data: { folder: folderName } });
+        return response.data; // Return success response for folder deletion
+    } catch (error) {
+        console.error('Error deleting folder:', error);
+        throw error;
+    }
+};
+
+// Function to get resources by folder path
+export const getResourcesByFolderPath = async (folderPath) => {
+    try {
+        const response = await axios.get(`${API_BASE_URL}/resources`, {
+            params: { folder_path: folderPath }
+        });
+        return response.data; // Return resources in the folder
+    } catch (error) {
+        console.error('Error fetching resources:', error);
+        throw error;
+    }
 };

@@ -1,54 +1,53 @@
-// frontend/src/components/FileManager.js
-
 import React, { useEffect, useState } from 'react';
-import { getRootFolders, getFilesInFolder, createFolder } from '../services/api';
-import FileList from './FileList';
-import FileUpload from './FileUpload';
+import { getRootFolders, getSubFolders, getFilesInFolder, createFolder, deleteFolder } from '../services/api';
+import FileList from './FileList';  // For the right section to show files
+import FolderTree from './FolderTree';  // For the left tree view
 
 const FileManager = () => {
-    const [folders, setFolders] = useState([]);
-    const [files, setFiles] = useState([]);
-    const [selectedFolder, setSelectedFolder] = useState(null);
-    const [newFolderName, setNewFolderName] = useState('');
-    const [refresh, setRefresh] = useState(false);
+    const [folders, setFolders] = useState([]);         // State for root folders
+    const [files, setFiles] = useState([]);             // State for files
+    const [selectedFolderPath, setSelectedFolderPath] = useState(null); // Currently selected folder path
+    const [newFolderName, setNewFolderName] = useState('');   // New folder name for folder creation
+    const [refresh, setRefresh] = useState(false);      // State to trigger folder refresh
 
     useEffect(() => {
-        const fetchFolders = async () => {
+        // Fetch root folders when component mounts or refresh is triggered
+        const fetchRootFolders = async () => {
             try {
                 const response = await getRootFolders();
-                setFolders(response);
+                setFolders(response);  // Update root folders
             } catch (error) {
-                console.error('Error fetching folders:', error);
+                console.error('Error fetching root folders:', error);
             }
         };
 
-        fetchFolders();
-    }, [refresh]);
+        fetchRootFolders();
+    }, [refresh]);  // Rerun when refresh changes
 
-    const handleFolderClick = async (folderName) => {
+    // Fetch files and subfolders in a selected folder
+    const handleFolderClick = async (folderPath) => {
         try {
-            const response = await getFilesInFolder(folderName);
-            setFiles(response);
-            setSelectedFolder(folderName);
+            const subFolderResponse = await getSubFolders(folderPath);
+            const fileResponse = await getFilesInFolder(folderPath);
+            
+            setFiles(fileResponse);  // Populate the right section with files
+            setFolders(subFolderResponse.subfolders);  // Update the folder structure with subfolders
+            setSelectedFolderPath(folderPath);  // Set the currently selected folder path
         } catch (error) {
-            console.error('Error fetching files:', error);
+            console.error('Error fetching files or subfolders:', error);
         }
-    };
-
-    const handleFileUploaded = () => {
-        setRefresh(!refresh); // Refresh folders after a file is uploaded
     };
 
     // Handle folder creation
     const handleCreateFolder = async (e) => {
         e.preventDefault();
-
         if (!newFolderName) return;
 
         try {
-            await createFolder(newFolderName);
-            setNewFolderName('');
-            setRefresh(!refresh); // Refresh folders after creating a new one
+            // Create new folder using the current selected folder as the base
+            await createFolder(`${selectedFolderPath ? selectedFolderPath + '/' : ''}${newFolderName}`);
+            setNewFolderName('');   // Reset the new folder input
+            setRefresh(!refresh);   // Trigger folder tree refresh
         } catch (error) {
             console.error('Error creating folder:', error);
         }
@@ -56,12 +55,13 @@ const FileManager = () => {
 
     return (
         <div className="flex">
-            {/* Left sidebar for folders */}
+            {/* Left section: Folder Tree */}
             <div className="w-1/4 border-r p-4">
                 <h2 className="font-bold text-lg mb-4">Folders</h2>
-                
+                <FolderTree folders={folders} onFolderClick={handleFolderClick} />
+
                 {/* Folder creation form */}
-                <form onSubmit={handleCreateFolder} className="mb-4">
+                <form onSubmit={handleCreateFolder} className="mt-4">
                     <input
                         type="text"
                         placeholder="New folder name"
@@ -73,25 +73,12 @@ const FileManager = () => {
                         Create Folder
                     </button>
                 </form>
-
-                <ul>
-                    {folders.map((folder) => (
-                        <li
-                            key={folder.public_id}
-                            className="cursor-pointer mb-2 hover:bg-gray-200 p-2 rounded"
-                            onClick={() => handleFolderClick(folder.folder_name)}
-                        >
-                            {folder.folder_name}
-                        </li>
-                    ))}
-                </ul>
             </div>
 
-            {/* Right section for files and upload form */}
+            {/* Right section: Files and Folders */}
             <div className="w-3/4 p-4">
-                <h2 className="font-bold text-lg mb-4">Files in {selectedFolder || 'Root'}</h2>
-                <FileUpload onFileUploaded={handleFileUploaded} />
-                <FileList files={files} onFileDeleted={handleFileUploaded} />
+                <h2 className="font-bold text-lg mb-4">Files in {selectedFolderPath || 'Root'}</h2>
+                <FileList files={files} onFileDeleted={() => setRefresh(!refresh)} />
             </div>
         </div>
     );

@@ -189,6 +189,7 @@ const getRootFolders = async (req, res) => {
 // Handle fetching subfolders for a specified parent folder
 const getSubFolders = async (req, res) => {
     const { folder } = req.params; // Get folder name from request parameters
+  // const { folder } = req.body;// Get folder name from request parameters
     const { max_results = 10, next_cursor } = req.query; // Optional query parameters with default max_results
 
     try {
