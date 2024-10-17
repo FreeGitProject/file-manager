@@ -241,20 +241,20 @@ const deleteFolder = async (req, res) => {
 };
 
 const getResourcesByFolderPath = async (req, res) => {
-    const { folder_path } = req.query; // Get folder_id from query parameters
+    const { folder_path } = req.query; // Get folder_path from query parameters
     const sort_by = 'uploaded_at';
-    const max_results = 50;
+    const max_results = 500;
 
-    // Ensure folder_id is provided
-    if (!folder_path) {
-        return res.status(400).json({ success: false, message: 'folder_id is required.' });
-    }
+    // Ensure folder_path is provided
+    // if (!folder_path) {
+    //     return res.status(400).json({ success: false, message: 'folder_path is required.' });
+    // }
 
     try {
-        // Fetch resources from Cloudinary using the folder_id as prefix
+        // Fetch resources from Cloudinary using the folder_path as prefix
         const result = await cloudinary.api.resources({
             type: 'upload', // Change to the resource type you're interested in
-            prefix: folder_path, // Use the folder_id as the prefix
+            prefix: folder_path, // Use the folder_path as the prefix
             max_results: max_results,
             sort_by: sort_by,
         });

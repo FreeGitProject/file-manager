@@ -16,20 +16,35 @@ const FileViewer = ({ selectedFolder }) => {
 
   return (
     <div>
-      <h3 className="text-lg font-bold mb-2">Files in {selectedFolder}</h3>
-      <ul className="list-disc pl-5">
+      <h3 className="text-2xl font-bold mb-4">Files in {selectedFolder}</h3>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {files.length > 0 ? (
           files.map((file) => (
-            <li key={file.asset_id}>
-              <a href={file.secure_url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
-                {file.public_id} ({file.format})
+            <div key={file.asset_id} className="border rounded-lg shadow-md p-4">
+              {/* Image Thumbnail */}
+              <img
+                src={file.secure_url}
+                alt={file.public_id}
+                className="w-full h-40 object-cover rounded mb-2" // Fixed height
+              />
+              <h4 className="text-xl font-semibold mb-2">{file.public_id}</h4>
+              <p className="text-gray-600">Size: {Math.round(file.bytes / 1024)} KB</p>
+              <p className="text-gray-600">Folder: {file.folder}</p>
+              <p className="text-gray-600">Format: {file.format}</p>
+              <a
+                href={file.secure_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-600 hover:underline mt-2 block"
+              >
+                View File
               </a>
-            </li>
+            </div>
           ))
         ) : (
-          <p>No files found in this folder.</p>
+          <p className="text-gray-600">No files found in this folder.</p>
         )}
-      </ul>
+      </div>
     </div>
   );
 };

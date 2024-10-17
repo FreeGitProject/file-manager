@@ -22,10 +22,10 @@ router.get('/files/folder/:folderName', getFilesInFolder); // New route for fetc
 router.get('/getSubFolders', getSubFolders);
 //router.post('/folders', createFolder); // New route for creating folders
 // Route for creating a new folder
-router.post('/folders', createFolder);
+router.post('/createFolder', createFolder);
 
 // Route for deleting a folder
-router.delete('/folders', deleteFolder);
+router.delete('/deleteFolder', deleteFolder);
 
 // Route for getting resources by folder_id
 router.get('/getResourcesByFolderPath', getResourcesByFolderPath);
