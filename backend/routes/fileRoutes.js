@@ -19,7 +19,7 @@ router.get('/', getFiles);
 router.get('/getRootFolders', getRootFolders);
 router.get('/files/folder/:folderName', getFilesInFolder); // New route for fetching files in a folder
 // Define the route for fetching subfolders of a specified parent folder
-router.get('/getSubFolders/:folder', getSubFolders);
+router.get('/getSubFolders', getSubFolders);
 //router.post('/folders', createFolder); // New route for creating folders
 // Route for creating a new folder
 router.post('/folders', createFolder);

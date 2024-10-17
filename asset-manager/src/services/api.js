@@ -10,8 +10,8 @@ export const getRootFolders = async () => {
 
 // Fetch subfolders
 export const getSubFolders = async (folderPath) => {
-  const response = await axios.get(`${API_BASE_URL}/getSubFolders/${folderPath}`);
-  //const response = await axios.get(`${API_BASE_URL}/getSubFolders`,{ folder: folderPath });
+  //const response = await axios.get(`${API_BASE_URL}/getSubFolders/${folderPath}`);
+  const response = await axios.get(`${API_BASE_URL}/getSubFolders`,{ params:{folder: folderPath} });
   return response.data.subfolders;
 };
 
