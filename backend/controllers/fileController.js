@@ -22,15 +22,16 @@ const uploadFile = (req, res) => {
 const getFiles = async (req, res) => {
     try {
         const { resources } = await cloudinary.search
-            .expression('folder:file-manager') // Filter by folder
+            .expression('folder:""') // Filter by folder
             .sort_by('public_id', 'desc')
-            .max_results(30)
+            .max_results(500)
             .execute();
 
         const files = resources.map((file) => ({
             public_id: file.public_id,
             url: file.secure_url,
             size: file.bytes, // Get the file size in bytes from Cloudinary
+            folder:file.folder
         }));
 
         res.status(200).json(files);
