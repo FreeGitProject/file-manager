@@ -3,7 +3,7 @@ import FolderTree from "./FolderTree";
 import FileViewer from "./FileViewer";
 
 const AssetManager = () => {
-  const [selectedFolder, setSelectedFolder] = useState("");
+  const [selectedFolder, setSelectedFolder] = useState("Home");//bydefault set home
 
   const handleFolderSelect = (folderPath) => {
     console.log('Selected Folder:', folderPath);
@@ -20,11 +20,12 @@ const AssetManager = () => {
         <FolderTree onSelectFolder={handleFolderSelect} />
       </div>
       <div className="w-2/3 p-4">
-        {selectedFolder ? (
+      <FileViewer selectedFolder={selectedFolder} />
+        {/* {selectedFolder ? (
           <FileViewer selectedFolder={selectedFolder} />
         ) : (
           <div>Please select a folder from the left to view its contents</div>
-        )}
+        )} */}
       </div>
     </div>
   );

@@ -48,3 +48,9 @@ export const deleteFileByPublicId = async (publicId) => {
   const response = await axios.delete(`${API_BASE_URL}/deleteFile`, { params:{public_id: publicId} });
   return response.data;
 };
+//
+// Fetch root folders
+export const rootResources  = async () => {
+  const response = await axios.get(`${API_BASE_URL}/root-resources `);
+  return response.data;
+};
