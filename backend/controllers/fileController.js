@@ -19,8 +19,8 @@ const uploadFile = (req, res) => {
     });
 };
 
-// Handle fetching the list of files
-const getFiles = async (req, res) => {
+// Handle fetching the list of files root-Resources
+const rootResources = async (req, res) => {
     try {
         const { resources } = await cloudinary.search
             .expression('folder:""') // Filter by folder
@@ -28,14 +28,14 @@ const getFiles = async (req, res) => {
             .max_results(500)
             .execute();
 
-        const files = resources.map((file) => ({
-            public_id: file.public_id,
-            url: file.secure_url,
-            size: file.bytes, // Get the file size in bytes from Cloudinary
-            folder:file.folder
-        }));
+        // const files = resources.map((file) => ({
+        //     public_id: file.public_id,
+        //     url: file.secure_url,
+        //     size: file.bytes, // Get the file size in bytes from Cloudinary
+        //     folder:file.folder
+        // }));
 
-        res.status(200).json(files);
+        res.status(200).json(resources);
     } catch (error) {
         res.status(500).json({ message: 'Error fetching files', error });
     }
@@ -332,4 +332,4 @@ const getResourcesByExternalId = async (req, res) => {
     }
 };
 
-module.exports = { uploadFile, getFiles,deleteFile ,deleteFolder, getRootFolders,getSubFolders , getFilesInFolder ,createFolder,getResourcesByFolderPath ,getResourcesByExternalId  };
+module.exports = { uploadFile, rootResources,deleteFile ,deleteFolder, getRootFolders,getSubFolders , getFilesInFolder ,createFolder,getResourcesByFolderPath ,getResourcesByExternalId  };

@@ -1,7 +1,7 @@
 // backend/routes/fileRoutes.js
 
 const express = require('express');
-const { uploadFile, getFiles, deleteFile, getFilesInFolder, getRootFolders, createFolder, getSubFolders, deleteFolder, getResourcesByFolderPath, getResourcesByExternalId } = require('../controllers/fileController');
+const { uploadFile, rootResources, deleteFile, getFilesInFolder, getRootFolders, createFolder, getSubFolders, deleteFolder, getResourcesByFolderPath, getResourcesByExternalId } = require('../controllers/fileController');
 const multer = require('multer');
 const { storage } = require('../config/cloudinary');
 
@@ -11,8 +11,8 @@ const upload = multer({ storage });
 // Route to upload a file
 //router.post('/upload', upload.single('file'), uploadFile);
 router.post('/uploadImage', upload.single('image'), uploadFile);
-// Route to get the list of uploaded files
-router.get('/', getFiles);
+// Route to get the list of uploaded files in root-Resources
+router.get('/root-resources', rootResources);
 // Delete file route
 router.delete('/deleteFile', deleteFile); // <-- New route for deleting a file by public ID
 
