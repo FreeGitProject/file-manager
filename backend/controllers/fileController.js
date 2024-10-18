@@ -276,6 +276,39 @@ const getResourcesByFolderPath = async (req, res) => {
         });
     }
 };
+const getResourcesByPaginationFolderPath = async (req, res) => {
+   // const { folder_path } = req.query; // Get folder_path from query parameters
+    const sort_by = 'uploaded_at';
+    //const max_results = 500;
+    const { folder_path,max_results = 10, next_cursor } = req.query; // Optional query parameters with default max_results
+    //Ensure folder_path is provided
+    if (!folder_path) {
+        return res.status(400).json({ success: false, message: 'folder_path is required.' });
+    }
+
+    try {
+        // Fetch resources from Cloudinary using the folder_path as prefix
+        const result = await cloudinary.api.resources({
+            type: 'upload', // Change to the resource type you're interested in
+            prefix: folder_path, // Use the folder_path as the prefix
+            max_results: max_results,
+            sort_by: sort_by,
+            next_cursor:next_cursor
+        });
+
+        res.status(200).json({
+            success: true,
+            resources: result.resources,
+            next_cursor: result.next_cursor,
+          //  total_count: result.total_count || 4
+        });
+    } catch (error) {
+        res.status(500).json({
+            message: 'Error fetching resources',
+            error: error.message || error,
+        });
+    }
+};
 
 // Sample folders (this would typically come from your database or a service)
 const folders = [
@@ -332,4 +365,4 @@ const getResourcesByExternalId = async (req, res) => {
     }
 };
 
-module.exports = { uploadFile, rootResources,deleteFile ,deleteFolder, getRootFolders,getSubFolders , getFilesInFolder ,createFolder,getResourcesByFolderPath ,getResourcesByExternalId  };
+module.exports = { uploadFile, rootResources,deleteFile ,deleteFolder, getRootFolders,getSubFolders , getFilesInFolder ,createFolder,getResourcesByFolderPath ,getResourcesByExternalId ,getResourcesByPaginationFolderPath };

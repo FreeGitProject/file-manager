@@ -1,7 +1,7 @@
 // backend/routes/fileRoutes.js
 
 const express = require('express');
-const { uploadFile, rootResources, deleteFile, getFilesInFolder, getRootFolders, createFolder, getSubFolders, deleteFolder, getResourcesByFolderPath, getResourcesByExternalId } = require('../controllers/fileController');
+const { uploadFile, rootResources, deleteFile, getFilesInFolder, getRootFolders, createFolder, getSubFolders, deleteFolder, getResourcesByFolderPath, getResourcesByExternalId,getResourcesByPaginationFolderPath } = require('../controllers/fileController');
 const multer = require('multer');
 const { storage } = require('../config/cloudinary');
 
@@ -28,6 +28,7 @@ router.post('/createFolder', createFolder);
 router.delete('/deleteFolder', deleteFolder);
 // Route for getting resources by folder_id
 router.get('/getResourcesByFolderPath', getResourcesByFolderPath);
+router.get('/getResourcesByPaginationFolderPath', getResourcesByPaginationFolderPath);
 
 // Route for getting resources by external_id
 router.get('/resources/by-external-id', getResourcesByExternalId);
