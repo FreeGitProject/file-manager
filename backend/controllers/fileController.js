@@ -251,10 +251,10 @@ const getResourcesByFolderPath = async (req, res) => {
     const sort_by = 'uploaded_at';
     const max_results = 500;
 
-    // Ensure folder_path is provided
-    // if (!folder_path) {
-    //     return res.status(400).json({ success: false, message: 'folder_path is required.' });
-    // }
+    //Ensure folder_path is provided
+    if (!folder_path) {
+        return res.status(400).json({ success: false, message: 'folder_path is required.' });
+    }
 
     try {
         // Fetch resources from Cloudinary using the folder_path as prefix
