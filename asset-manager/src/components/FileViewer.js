@@ -75,7 +75,7 @@ const FileViewer = ({ selectedFolder }) => {
                 alt={file.public_id}
                 className="w-full h-40 object-cover rounded mb-2"
               />
-              <h4 className="text-xl font-semibold mb-2">{file.public_id}</h4>
+              <h4 className="text-xl font-semibold mb-2">{file.public_id ? file.public_id.split('/').pop().trim() : 'Unnamed File'}</h4>
               <p className="text-gray-600">Size: {Math.round(file.bytes / 1024)} KB</p>
               <p className="text-gray-600">Folder: {file.folder}</p>
               <p className="text-gray-600">Format: {file.format}</p>
