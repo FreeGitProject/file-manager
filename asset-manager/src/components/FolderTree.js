@@ -10,11 +10,14 @@ const FolderTree = ({ onSelectFolder }) => {
   const [expandedFolders, setExpandedFolders] = useState({});
   const [newFolderName, setNewFolderName] = useState('');
   const [folderToDelete, setFolderToDelete] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     const fetchFolders = async () => {
+      setIsLoading(true);
       const rootFolders = await getRootFolders();
       setFolders(rootFolders);
+      setIsLoading(false);
     };
     fetchFolders();
   }, []);
@@ -70,6 +73,10 @@ const FolderTree = ({ onSelectFolder }) => {
 
   return (
     <div>
+    {isLoading ? (
+      <p>Loading files...</p>
+    ) : (
+      <div>
       <h3 className="text-lg font-bold mb-2">Folder Structure</h3>
       <div>{renderFolders(folders)}</div>
 
@@ -102,6 +109,9 @@ const FolderTree = ({ onSelectFolder }) => {
         </button>
       </div>
     </div>
+    )}
+  </div>
+
   );
 };
 
