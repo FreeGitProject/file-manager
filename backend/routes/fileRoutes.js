@@ -9,7 +9,8 @@ const router = express.Router();
 const upload = multer({ storage });
 
 // Route to upload a file
-router.post('/upload', upload.single('file'), uploadFile);
+//router.post('/upload', upload.single('file'), uploadFile);
+router.post('/uploadImage', upload.single('image'), uploadFile);
 // Route to get the list of uploaded files
 router.get('/', getFiles);
 // Delete file route

@@ -34,3 +34,12 @@ export const deleteFolder = async (folderPath) => {
   const response = await axios.delete(`${API_BASE_URL}/deleteFolder`, { params:{folder: folderPath} });
   return response.data;
 };
+export const uploadImageToFolder = async (formData) => {
+  const response = await axios.post(`${API_BASE_URL}/uploadImage`, formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+  console.log(response.data)
+  return response.data;
+};

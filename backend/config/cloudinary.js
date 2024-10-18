@@ -14,8 +14,9 @@ console.log(process.env.CLOUDINARY_API_KEY,"sdf");
 const storage = new CloudinaryStorage({
     cloudinary,
     params: {
-        folder: 'file-manager',  // The folder where files will be uploaded in Cloudinary
+        folder: (req, file) => req.body.folder, // Dynamic folder name from request body
         allowed_formats: ['jpg', 'png', 'pdf', 'docx'],  // Define file types
+        public_id: (req, file) => file.originalname.split('.')[0], // Use original file name
     },
 });
 

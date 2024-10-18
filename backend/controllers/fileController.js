@@ -12,6 +12,7 @@ const uploadFile = (req, res) => {
     const fileSize = req.file.size; // Get file size
 
     res.status(200).json({
+        success: true,
         message: 'File uploaded successfully',
         fileUrl,
         fileSize, // Include file size in response
