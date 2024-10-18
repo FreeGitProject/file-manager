@@ -47,7 +47,7 @@ const FileViewer = ({ selectedFolder }) => {
       return;
     }
     //here set selectedFolder root directory folder ""
-    if (selectedFolder === "Home") selectedFolder = "";
+   // if (selectedFolder === "Home") selectedFolder = "";
 
     setIsUploading(true); // Set uploading state to true
     const formData = new FormData();
@@ -59,8 +59,16 @@ const FileViewer = ({ selectedFolder }) => {
       if (response.success) {
         // Reload files after successful upload
         alert(response.message);
-        const resources = await getResourcesByFolderPath(selectedFolder);
-        setFiles(resources);
+        console.log(selectedFolder,"selectedFolderupload")
+        if (selectedFolder === "Home")
+          {
+              // Fetch root files when no folder is selected (Home view)
+          const resources = await rootResources();
+        }else{
+
+          const resources = await getResourcesByFolderPath(selectedFolder);
+          setFiles(resources);
+        }
         setSelectedFile(null); // Reset selected file
       } else {
         alert("File upload failed");
