@@ -1,7 +1,7 @@
 // backend/routes/fileRoutes.js
 
 const express = require('express');
-const { uploadFile, rootResources, deleteFile, getFilesInFolder, getRootFolders, createFolder, getSubFolders, deleteFolder, getResourcesByFolderPath, getResourcesByExternalId,getResourcesByPaginationFolderPath } = require('../controllers/fileController');
+const { uploadFile, rootResources, deleteFile, getFilesInFolder, getRootFolders, createFolder, getSubFolders, deleteFolder, getResourcesByFolderPath, getResourcesByExternalId,getResourcesByPaginationFolderPath, searchResources } = require('../controllers/fileController');
 const multer = require('multer');
 const { storage } = require('../config/cloudinary');
 
@@ -32,4 +32,6 @@ router.get('/getResourcesByPaginationFolderPath', getResourcesByPaginationFolder
 
 // Route for getting resources by external_id
 router.get('/resources/by-external-id', getResourcesByExternalId);
+// Route to search files by query
+router.post('/search-resources', searchResources);
 module.exports = router;

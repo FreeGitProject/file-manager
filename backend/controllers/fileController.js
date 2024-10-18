@@ -307,6 +307,38 @@ const getResourcesByPaginationFolderPath = async (req, res) => {
     }
 };
 
+// Handle searching files based on a query
+const searchResources = async (req, res) => {
+    try {
+      const { query,folder_path } = req.body;
+  
+      if (!query) {
+        return res.status(400).json({ message: 'Search query is required' });
+      }
+   // Construct the search expression to include folder and query
+   let searchExpression = `resource_type:image`;
+
+   // If a folder is provided, add it to the search expression
+   if (folder_path) {
+     searchExpression += ` AND folder:${folder_path}`;
+   }
+
+  // Use OR condition to search either by filename or full public_id
+  searchExpression += ` AND (public_id:${query} OR filename:${query})`;
+
+   // Execute the search with the constructed expression
+   const { resources } = await cloudinary.search
+     .expression(searchExpression)
+     .sort_by('public_id', 'desc')
+     .max_results(50)
+     .execute();
+  
+      res.status(200).json(resources);
+    } catch (error) {
+      console.error('Error during search:', error);
+      res.status(500).json({ message: 'Error searching files', error });
+    }
+  };
 // Sample folders (this would typically come from your database or a service)
 const folders = [
     { name: "avatars", path: "avatars", external_id: "c88bd8cd768958f4518633ced4e173e5eb" },
@@ -362,4 +394,4 @@ const getResourcesByExternalId = async (req, res) => {
     }
 };
 
-module.exports = { uploadFile, rootResources,deleteFile ,deleteFolder, getRootFolders,getSubFolders , getFilesInFolder ,createFolder,getResourcesByFolderPath ,getResourcesByExternalId ,getResourcesByPaginationFolderPath };
+module.exports = { searchResources,uploadFile, rootResources,deleteFile ,deleteFolder, getRootFolders,getSubFolders , getFilesInFolder ,createFolder,getResourcesByFolderPath ,getResourcesByExternalId ,getResourcesByPaginationFolderPath };
