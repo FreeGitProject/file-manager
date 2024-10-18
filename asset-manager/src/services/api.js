@@ -40,6 +40,11 @@ export const uploadImageToFolder = async (formData) => {
       'Content-Type': 'multipart/form-data',
     },
   });
-  console.log(response.data)
+  //console.log(response.data)
+  return response.data;
+};
+// Delete file by public_id
+export const deleteFileByPublicId = async (publicId) => {
+  const response = await axios.delete(`${API_BASE_URL}/deleteFile`, { params:{public_id: publicId} });
   return response.data;
 };

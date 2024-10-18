@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { getResourcesByFolderPath, uploadImageToFolder } from '../services/api'; // Import the new uploadImageToFolder API
+import { getResourcesByFolderPath, uploadImageToFolder ,deleteFileByPublicId } from '../services/api'; // Import the new uploadImageToFolder API
 
 const FileViewer = ({ selectedFolder }) => {
   const [files, setFiles] = useState([]);
   const [selectedFile, setSelectedFile] = useState(null); // State for selected image file
   const [isUploading, setIsUploading] = useState(false); // Uploading state
-
+  const [isDeleting, setIsDeleting] = useState(false);
   useEffect(() => {
     const fetchFiles = async () => {
       if (selectedFolder) {
@@ -52,7 +52,27 @@ const FileViewer = ({ selectedFolder }) => {
       setIsUploading(false); // Reset uploading state
     }
   };
-
+ // Handle file deletion
+ const handleDeleteFile = async (publicId) => {
+  const confirmDelete = window.confirm('Are you sure you want to delete this file?');
+  if (confirmDelete) {
+    setIsDeleting(true);
+    try {
+      const response = await deleteFileByPublicId(publicId);
+      if (response.success) {
+        // Remove the deleted file from the list
+        setFiles(files.filter((file) => file.public_id !== publicId));
+      } else {
+        alert('Error deleting file');
+      }
+    } catch (error) {
+      console.error('Error deleting file:', error);
+      alert('An error occurred while deleting the file.');
+    } finally {
+      setIsDeleting(false);
+    }
+  }
+};
   return (
     <div>
       <h3 className="text-2xl font-bold mb-4">Files in {selectedFolder}</h3>
@@ -87,6 +107,13 @@ const FileViewer = ({ selectedFolder }) => {
               >
                 View File
               </a>
+              <button
+                onClick={() => handleDeleteFile(file.public_id)}
+                className="bg-red-500 text-white p-2 rounded mt-2"
+                disabled={isDeleting}
+              >
+                {isDeleting ? 'Deleting...' : 'Delete File'}
+              </button>
             </div>
           ))
         ) : (

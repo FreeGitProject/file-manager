@@ -43,19 +43,22 @@ const getFiles = async (req, res) => {
 
 // Handle file deletion
 const deleteFile = async (req, res) => {
-    const publicId = req.params.public_id; // Get the file's public ID from the request parameters
+    const { public_id } = req.query; // Get the file's public ID from the request parameters
 
+    if (!public_id) {
+        return res.status(400).json({ success: false, message: 'Public ID is required' });
+      }
     try {
         // Delete file from Cloudinary using its public ID
-        const result = await cloudinary.uploader.destroy(publicId);
+        const result = await cloudinary.uploader.destroy(public_id);
 
         if (result.result === 'ok') {
-            return res.status(200).json({ message: 'File deleted successfully' });
+            return res.status(200).json({success: true, message: 'File deleted successfully' });
         } else {
-            return res.status(400).json({ message: 'Failed to delete file' });
+            return res.status(400).json({ success: false,message: 'Failed to delete file' });
         }
     } catch (error) {
-        return res.status(500).json({ message: 'Error deleting file', error });
+        return res.status(500).json({ success: false, message: 'Error deleting file', error });
     }
 };
 // Handle fetching the list of root folders

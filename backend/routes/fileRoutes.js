@@ -14,7 +14,7 @@ router.post('/uploadImage', upload.single('image'), uploadFile);
 // Route to get the list of uploaded files
 router.get('/', getFiles);
 // Delete file route
-//router.delete('/:public_id', deleteFile); // <-- New route for deleting a file by public ID
+router.delete('/deleteFile', deleteFile); // <-- New route for deleting a file by public ID
 
 router.get('/files/folder/:folderName', getFilesInFolder); // New route for fetching files in a folder
 // Define the route for fetching root folders
