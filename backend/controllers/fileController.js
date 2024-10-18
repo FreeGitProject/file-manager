@@ -277,9 +277,7 @@ const getResourcesByFolderPath = async (req, res) => {
     }
 };
 const getResourcesByPaginationFolderPath = async (req, res) => {
-   // const { folder_path } = req.query; // Get folder_path from query parameters
     const sort_by = 'uploaded_at';
-    //const max_results = 500;
     const { folder_path,max_results = 10, next_cursor } = req.query; // Optional query parameters with default max_results
     //Ensure folder_path is provided
     if (!folder_path) {
@@ -300,7 +298,6 @@ const getResourcesByPaginationFolderPath = async (req, res) => {
             success: true,
             resources: result.resources,
             next_cursor: result.next_cursor,
-          //  total_count: result.total_count || 4
         });
     } catch (error) {
         res.status(500).json({
