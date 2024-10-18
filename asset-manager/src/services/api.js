@@ -54,3 +54,16 @@ export const rootResources  = async () => {
   const response = await axios.get(`${API_BASE_URL}/root-resources `);
   return response.data;
 };
+// Search resources by filename or public ID
+export const searchResources = async (searchQuery,selectedFolder) => {
+  try {
+    const response = await axios.post(`${API_BASE_URL}/search-resources`, {
+      query: searchQuery,
+      folder_path: selectedFolder,
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error searching files:', error);
+    throw error;
+  }
+};

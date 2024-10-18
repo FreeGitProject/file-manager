@@ -4,6 +4,7 @@ import {
   uploadImageToFolder,
   deleteFileByPublicId,
   rootResources,
+  searchResources,
 } from "../services/api"; // Import rootResources API
 
 const FileViewer = ({ selectedFolder }) => {
@@ -12,22 +13,23 @@ const FileViewer = ({ selectedFolder }) => {
   const [isUploading, setIsUploading] = useState(false); // Uploading state
   const [isDeleting, setIsDeleting] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [searchQuery, setSearchQuery] = useState(""); // For search query
+  const fetchFiles = async () => {
+    // console.log("!selectedFolder", selectedFolder);
+    if (selectedFolder === "Home") {
+      setIsLoading(true);
+      // Fetch root files when no folder is selected (Home view)
+      const resources = await rootResources();
+      setFiles(resources);
+      setIsLoading(false);
+    } else {
+      setIsLoading(true);
+      const resources = await getResourcesByFolderPath(selectedFolder);
+      setFiles(resources);
+      setIsLoading(false);
+    }
+  };
   useEffect(() => {
-    const fetchFiles = async () => {
-     // console.log("!selectedFolder", selectedFolder);
-      if (selectedFolder==='Home') {
-        setIsLoading(true);
-        // Fetch root files when no folder is selected (Home view)
-        const resources = await rootResources();
-        setFiles(resources);
-        setIsLoading(false);
-      } else {
-        setIsLoading(true);
-        const resources = await getResourcesByFolderPath(selectedFolder);
-        setFiles(resources);
-        setIsLoading(false);
-      }
-    };
     fetchFiles();
   }, [selectedFolder]);
 
@@ -45,8 +47,7 @@ const FileViewer = ({ selectedFolder }) => {
       return;
     }
     //here set selectedFolder root directory folder ""
-    if(selectedFolder==='Home')
-      selectedFolder="";
+    if (selectedFolder === "Home") selectedFolder = "";
 
     setIsUploading(true); // Set uploading state to true
     const formData = new FormData();
@@ -95,6 +96,28 @@ const FileViewer = ({ selectedFolder }) => {
       }
     }
   };
+  // Handle search input change
+  const handleSearchChange = (e) => {
+    setSearchQuery(e.target.value);
+  };
+
+  // Handle search form submission
+  const handleSearchSubmit = async (e) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      try {
+        if (selectedFolder === "Home") selectedFolder = "";
+        const results = await searchResources(searchQuery, selectedFolder);
+
+        // console.log(results)
+        setFiles(results);
+      } catch (error) {
+        console.error("Error searching files:", error);
+      }
+    } else {
+      await fetchFiles();
+    }
+  };
   //return (<div>ss</div>)
   return (
     <div>
@@ -121,9 +144,25 @@ const FileViewer = ({ selectedFolder }) => {
               {isUploading ? "Uploading..." : "Upload Image"}
             </button>
           </form>
+          {/* Search Form */}
+          <form onSubmit={handleSearchSubmit} className="mb-4">
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={handleSearchChange}
+              placeholder="Search by filename or public ID"
+              className="border p-2 rounded mr-2"
+            />
+            <button
+              type="submit"
+              className="bg-blue-500 text-white p-2 rounded"
+            >
+              Search
+            </button>
+          </form>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {files.length > 0 ? (
+            {files?.length > 0 ? (
               files.map((file) => (
                 <div
                   key={file.asset_id}
