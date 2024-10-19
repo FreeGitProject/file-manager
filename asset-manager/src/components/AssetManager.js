@@ -3,15 +3,15 @@ import FolderTree from "./FolderTree";
 import FileViewer from "./FileViewer";
 
 const AssetManager = () => {
-  const [selectedFolder, setSelectedFolder] = useState("Home");//bydefault set home
+  const [selectedFolder, setSelectedFolder] = useState("Home"); //bydefault set home
 
   const handleFolderSelect = (folderPath) => {
-    console.log('Selected Folder:', folderPath);
+    console.log("AssetManager Selected Folder:", folderPath);
     setSelectedFolder(folderPath);
-  }; 
+  };
 
   useEffect(() => {
-    console.log('Updated Selected Folder:', selectedFolder);
+    console.log("Updated Selected Folder:", selectedFolder);
   }, [selectedFolder]);
 
   return (
@@ -20,7 +20,7 @@ const AssetManager = () => {
         <FolderTree onSelectFolder={handleFolderSelect} />
       </div>
       <div className="w-2/3 p-4">
-      <FileViewer selectedFolder={selectedFolder} />
+        <FileViewer selectedFolder={selectedFolder} />
         {/* {selectedFolder ? (
           <FileViewer selectedFolder={selectedFolder} />
         ) : (

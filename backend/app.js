@@ -10,7 +10,10 @@ const fileRoutes = require('./routes/fileRoutes');
 const app = express();
 
 // Middleware
-app.use(express.json());
+//app.use(express.json());
+app.use(express.json({ limit: '10mb' }));  // Increase JSON body limit
+app.use(express.urlencoded({ limit: '10mb', extended: true }));  // Increase URL-encoded form body limit
+
 
 // Enable CORS for all routes
 app.use(cors());
