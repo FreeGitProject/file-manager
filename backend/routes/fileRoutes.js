@@ -32,7 +32,7 @@ router.get("/root-resources-pagination", rootResourcesWithPagination);
 // Delete file route
 router.delete("/deleteFile", deleteFile); // <-- New route for deleting a file by public ID
 
-router.get("/files/folder/:folderName", getFilesInFolder); // New route for fetching files in a folder
+//router.get("/files/folder/:folderName", getFilesInFolder); // New route for fetching files in a folder
 // Define the route for fetching root folders
 router.get("/getRootFolders", getRootFolders);
 // Define the route for fetching subfolders of a specified parent folder
@@ -51,7 +51,7 @@ router.get(
 // Route to rename a file
 router.put('/renameFile', renameFile);
 // Route for getting resources by external_id
-router.get("/resources/by-external-id", getResourcesByExternalId);
+//router.get("/resources/by-external-id", getResourcesByExternalId);
 // Route to search files by query
 router.post("/search-resources", searchResources);
 module.exports = router;
