@@ -123,3 +123,15 @@ export const  renameFileById = async (asset_id, newName) => {
     console.error('Error renaming file:', error);
   }
 };
+// Fetch file details by asset_id
+export const getFileDetailsByAssetId = async (asset_id) => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/getFileDetailsByAssetId`, {
+      params: { asset_id },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching file details:", error);
+    throw error;
+  }
+};

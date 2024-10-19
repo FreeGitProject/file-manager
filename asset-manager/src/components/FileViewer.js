@@ -8,8 +8,10 @@ import {
   rootResourcesWithPagination,
   searchResources,
   renameFileById, // Import your rename function here
+  getFileDetailsByAssetId, // Import the API to get file details
 } from "../services/api"; // Import rootResources API
 import { FaFilePdf, FaFileExcel } from "react-icons/fa";
+import FileDetailModal from "./FileDetailModal";
 
 const FileViewer = ({ selectedFolder }) => {
   const [files, setFiles] = useState([]);
@@ -22,6 +24,8 @@ const FileViewer = ({ selectedFolder }) => {
   const [renamingFileId, setRenamingFileId] = useState(null); // State for the file being renamed
   const [nextCursor, setNextCursor] = useState(null); // State to track pagination cursor
   const [hasMoreFiles, setHasMoreFiles] = useState(true); // To check if there are more files to load
+  const [showModal, setShowModal] = useState(false); // Modal state
+  const [fileDetails, setFileDetails] = useState(null); // Store file details for modal
 
   // Fetch files with pagination
   const fetchFiles = async (append = false) => {
@@ -175,6 +179,16 @@ const handleRenameFile = async (fileId) => {
     alert("An error occurred while renaming the file.");
   }
 };
+ // Handle showing the modal with file details
+ const handleShowDetails = async (assetId) => {
+  try {
+    const details = await getFileDetailsByAssetId(assetId); // Fetch file details by asset_id
+    setFileDetails(details.data); // Store the details for the modal
+    setShowModal(true); // Show the modal
+  } catch (error) {
+    console.error("Error fetching file details:", error);
+  }
+};
   return (
     <div>
       {isLoading ? (
@@ -279,6 +293,12 @@ const handleRenameFile = async (fileId) => {
                   >
                     {isDeleting ? "Deleting..." : "Delete File"}
                   </button>
+                  <button
+                    onClick={() => handleShowDetails(file.asset_id)} // Show file details in modal
+                    className="bg-blue-500 text-white p-2 rounded mt-2"
+                  >
+                    View Details
+                  </button>
                 </div>
               ))
             ) : (
@@ -324,6 +344,14 @@ const handleRenameFile = async (fileId) => {
                 Cancel
               </button>
             </div>
+          )}
+
+           {/* Modal to show file details */}
+           {showModal && fileDetails && (
+            <FileDetailModal
+              fileDetails={fileDetails}
+              onClose={() => setShowModal(false)}
+            />
           )}
     </div>
   );
