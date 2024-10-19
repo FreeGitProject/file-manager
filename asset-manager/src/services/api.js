@@ -40,13 +40,26 @@ export const deleteFolder = async (folderPath) => {
   });
   return response.data;
 };
-export const uploadImageToFolder = async (formData) => {
-  const response = await axios.post(`${API_BASE_URL}/uploadImage`, formData, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
-  });
-  //console.log(response.data)
+// export const uploadImageToFolder = async (formData) => {
+//   const response = await axios.post(`${API_BASE_URL}/uploadImage`, formData, {
+//     headers: {
+//       "Content-Type": "multipart/form-data",
+//     },
+//   });
+//   //console.log(response.data)
+//   return response.data;
+// };
+// Modify uploadImageToFolder to accept folder as query
+export const uploadImageToFolder = async (formData, folder) => {
+  const response = await axios.post(
+    `${API_BASE_URL}/uploadImage?folder=${folder}`, // Send folder in query
+    formData,
+    {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    }
+  );
   return response.data;
 };
 // Delete file by public_id

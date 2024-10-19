@@ -52,10 +52,11 @@ const FileViewer = ({ selectedFolder }) => {
     setIsUploading(true); // Set uploading state to true
     const formData = new FormData();
     formData.append("image", selectedFile); // Append selected image file
-    formData.append("folder", selectedFolder); // Append folder name
+   // formData.append("folder", selectedFolder); // Append folder name
 
     try {
-      const response = await uploadImageToFolder(formData);
+       // Pass the folder as a query parameter in the URL
+    const response = await uploadImageToFolder(formData, selectedFolder);
       if (response.success) {
         // Reload files after successful upload
         alert(response.message);
@@ -63,6 +64,7 @@ const FileViewer = ({ selectedFolder }) => {
         if (selectedFolder === "Home") {
           // Fetch root files when no folder is selected (Home view)
           const resources = await rootResources();
+          setFiles(resources);
         } else {
           const resources = await getResourcesByFolderPath(selectedFolder);
           setFiles(resources);

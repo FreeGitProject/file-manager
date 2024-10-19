@@ -14,7 +14,7 @@ console.log(process.env.CLOUDINARY_API_KEY, "CloudinaryStorage");
 const storage = new CloudinaryStorage({
   cloudinary,
   params: {
-    folder: (req, file) => (req.body.folder === "Home" ? "" : req.body.folder), // Dynamic folder name from request body
+    folder: (req, file) => (req.query.folder === "Home" ? "" : req.query.folder), // Using req.query for folder
     allowed_formats: ["jpg", "png", "pdf", "docx", "gif"], // Define file types
     public_id: (req, file) => file.originalname.split(".")[0], // Use original file name
   },
