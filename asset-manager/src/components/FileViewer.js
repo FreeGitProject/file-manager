@@ -12,7 +12,8 @@ import {
 } from "../services/api"; // Import rootResources API
 import { FaFilePdf, FaFileExcel } from "react-icons/fa";
 import FileDetailModal from "./FileDetailModal";
-
+import { LoadingSpinner } from "./Loader/LoadingSpinner";
+const maxsize=6;
 const FileViewer = ({ selectedFolder }) => {
   const [files, setFiles] = useState([]);
   const [selectedFile, setSelectedFile] = useState(null); // State for selected image file
@@ -33,7 +34,7 @@ const FileViewer = ({ selectedFolder }) => {
     if (selectedFolder === "Home") {
       setIsLoading(true);
       // Fetch root files when no folder is selected (Home view)
-      const { resources, next_cursor } = await rootResourcesWithPagination(5,nextCursor);
+      const { resources, next_cursor } = await rootResourcesWithPagination(maxsize,nextCursor);
       setFiles(append ? [...files, ...resources] : resources);
 
       setIsLoading(false);
@@ -42,7 +43,7 @@ const FileViewer = ({ selectedFolder }) => {
       try {
         const { resources, next_cursor } = await getResourcesByPaginationFolderPath(
           selectedFolder,
-          5, // Fetch 10 files per page
+          maxsize, // Fetch 6 files per page
           nextCursor // Pass the current cursor for pagination
         );
         setFiles(append ? [...files, ...resources] : resources);
@@ -192,7 +193,8 @@ const handleRenameFile = async (fileId) => {
   return (
     <div>
       {isLoading ? (
-        <p>Loading files...</p>
+        // <p>Loading files...</p>
+        <LoadingSpinner/>
       ) : (
         <div>
           <h3 className="text-2xl font-bold mb-4">

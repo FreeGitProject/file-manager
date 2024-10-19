@@ -43,17 +43,24 @@ const rootResources = async (req, res) => {
 // Handle fetching the list of files root-Resources with Pagination
 const rootResourcesWithPagination = async (req, res) => {
   try {
-    const {  max_results = 10, next_cursor } = req.query; // Optional query parameters with default max_results
+    const { max_results = 10, next_cursor } = req.query; // Optional query parameters with default max_results
     const result = await cloudinary.search
       .expression('folder:""') // Filter by folder
       .sort_by("public_id", "desc")
       .max_results(max_results)
       .next_cursor(next_cursor)
       .execute();
+    // Map through resources to assign "Home" folder if folder is empty
+    const resourcesWithHomeFolder = result.resources.map((resource) => {
+      return {
+        ...resource,
+        folder: resource.folder === "" ? "Home" : resource.folder, // Assign "Home" if folder is empty
+      };
+    });
 
     res.status(200).json({
       success: true,
-      resources: result.resources,
+      resources: resourcesWithHomeFolder, // result.resources,
       next_cursor: result.next_cursor,
     });
   } catch (error) {
@@ -381,52 +388,70 @@ const searchResources = async (req, res) => {
 };
 // Rename a file by asset_id
 const renameFile = async (req, res) => {
-    try {
-      const { asset_id, newName } = req.body;
-  
-      if (!asset_id || !newName) {
-        return res.status(400).json({ success: false, message: 'Asset ID and new name are required' });
-      }
-  
-      // Find the file by asset_id and rename it
-      const file = await cloudinary.api.resource_by_asset_id(asset_id);
-  
-      if (!file) {
-        return res.status(404).json({ success: false, message: 'File not found' });
-      }
-        // Extract the current folder path from the public_id
-        const currentFolderPath1 = file.public_id.substring(0, file.public_id.lastIndexOf("/"));
-        const currentFolderPath = file.folder;
+  try {
+    const { asset_id, newName } = req.body;
 
-        // Combine the current folder path with the new name
-        let newFullPath='';
-        if(currentFolderPath)
-         newFullPath = `${currentFolderPath}/${newName}`;
-        else
-        newFullPath=newName;
-      // Rename the file
-      const renamedFile = await cloudinary.uploader.rename(file.public_id, newFullPath);
-  
-      res.status(200).json({
-        success: true,
-        message: 'File renamed successfully',
-        renamedFile
-      });
-    } catch (error) {
-      console.error('Error renaming file:', error);
-      res.status(500).json({ success: false, message: 'An error occurred while renaming the file' });
+    if (!asset_id || !newName) {
+      return res
+        .status(400)
+        .json({
+          success: false,
+          message: "Asset ID and new name are required",
+        });
     }
-  };
-  const getFileDetailsByAssetId = async (req,res)=>{
-    const { asset_id } = req.query;
+
+    // Find the file by asset_id and rename it
+    const file = await cloudinary.api.resource_by_asset_id(asset_id);
+
+    if (!file) {
+      return res
+        .status(404)
+        .json({ success: false, message: "File not found" });
+    }
+    // Extract the current folder path from the public_id
+    const currentFolderPath1 = file.public_id.substring(
+      0,
+      file.public_id.lastIndexOf("/")
+    );
+    const currentFolderPath = file.folder;
+
+    // Combine the current folder path with the new name
+    let newFullPath = "";
+    if (currentFolderPath) newFullPath = `${currentFolderPath}/${newName}`;
+    else newFullPath = newName;
+    // Rename the file
+    const renamedFile = await cloudinary.uploader.rename(
+      file.public_id,
+      newFullPath
+    );
+
+    res.status(200).json({
+      success: true,
+      message: "File renamed successfully",
+      renamedFile,
+    });
+  } catch (error) {
+    console.error("Error renaming file:", error);
+    res
+      .status(500)
+      .json({
+        success: false,
+        message: "An error occurred while renaming the file",
+      });
+  }
+};
+const getFileDetailsByAssetId = async (req, res) => {
+  const { asset_id } = req.query;
 
   if (!asset_id) {
-    return res.status(400).json({ success: false, message: "Asset ID is required" });
+    return res
+      .status(400)
+      .json({ success: false, message: "Asset ID is required" });
   }
 
   try {
     // Get the file details from Cloudinary using the asset_id
-    const fileDetails = await cloudinary.api.resource_by_asset_id(asset_id);//await cloudinary.api.resource(asset_id);
+    const fileDetails = await cloudinary.api.resource_by_asset_id(asset_id); //await cloudinary.api.resource(asset_id);
 
     res.status(200).json({
       success: true,
@@ -434,9 +459,14 @@ const renameFile = async (req, res) => {
     });
   } catch (error) {
     console.error("Error fetching file details:", error);
-    res.status(500).json({ success: false, message: "An error occurred while fetching file details" });
+    res
+      .status(500)
+      .json({
+        success: false,
+        message: "An error occurred while fetching file details",
+      });
   }
-  }
+};
 // Sample folders (this would typically come from your database or a service)
 const folders = [
   {
@@ -518,12 +548,10 @@ const getResourcesByExternalId = async (req, res) => {
 
   // If no folder found for the given external_id, return an error
   if (!folder) {
-    return res
-      .status(404)
-      .json({
-        success: false,
-        message: "Folder not found for the provided external_id.",
-      });
+    return res.status(404).json({
+      success: false,
+      message: "Folder not found for the provided external_id.",
+    });
   }
 
   try {
@@ -562,5 +590,5 @@ module.exports = {
   getResourcesByPaginationFolderPath,
   renameFile,
   rootResourcesWithPagination,
-  getFileDetailsByAssetId
+  getFileDetailsByAssetId,
 };
