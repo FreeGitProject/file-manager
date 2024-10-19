@@ -5,6 +5,7 @@ import {
   deleteFileByPublicId,
   rootResources,
   searchResources,
+  renameFileById, // Import your rename function here
 } from "../services/api"; // Import rootResources API
 import { FaFilePdf, FaFileExcel } from "react-icons/fa";
 
@@ -15,6 +16,9 @@ const FileViewer = ({ selectedFolder }) => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState(""); // For search query
+  const [newFileName, setNewFileName] = useState(""); // State for new file name
+  const [renamingFileId, setRenamingFileId] = useState(null); // State for the file being renamed
+
   const fetchFiles = async () => {
     console.log("!selectedFolder", selectedFolder);
     if (selectedFolder === "Home") {
@@ -127,7 +131,28 @@ const FileViewer = ({ selectedFolder }) => {
       await fetchFiles();
     }
   };
+// Handle file renaming
+const handleRenameFile = async (fileId) => {
+  if (!newFileName) {
+    alert("Please enter a new file name.");
+    return;
+  }
 
+  try {
+    const response = await renameFileById(fileId, newFileName); // API call to rename file
+    if (response.success) {
+      alert("File renamed successfully");
+      fetchFiles(); // Reload files after renaming
+      setNewFileName(""); // Clear the input field
+      setRenamingFileId(null); // Clear renaming state
+    } else {
+      alert("Error renaming file");
+    }
+  } catch (error) {
+    console.error("Error renaming file:", error);
+    alert("An error occurred while renaming the file.");
+  }
+};
   return (
     <div>
       {isLoading ? (
@@ -217,6 +242,15 @@ const FileViewer = ({ selectedFolder }) => {
                     View File
                   </a>
                   <button
+                    onClick={() => {
+                      setRenamingFileId(file.asset_id); // Set the file ID to be renamed
+                      setNewFileName(file.public_id.split("/").pop().trim()); // Set current name for editing
+                    }}
+                    className="bg-yellow-500 text-white p-2 rounded mt-2"
+                  >
+                    Rename File
+                  </button>
+                  <button
                     onClick={() => handleDeleteFile(file.public_id)}
                     className="bg-red-500 text-white p-2 rounded mt-2"
                     disabled={isDeleting}
@@ -229,6 +263,33 @@ const FileViewer = ({ selectedFolder }) => {
               <p className="text-gray-600">No files found in this folder.</p>
             )}
           </div>
+          {/* Renaming Input */}
+          {renamingFileId && (
+            <div className="mt-4">
+              <input
+                type="text"
+                value={newFileName}
+                onChange={(e) => setNewFileName(e.target.value)}
+                placeholder="Enter new file name"
+                className="border p-2 rounded mr-2"
+              />
+              <button
+                onClick={() => handleRenameFile(renamingFileId)}
+                className="bg-blue-500 text-white p-2 rounded"
+              >
+                Rename
+              </button>
+              <button
+                onClick={() => {
+                  setRenamingFileId(null); // Cancel renaming
+                  setNewFileName(""); // Clear input
+                }}
+                className="bg-gray-300 text-black p-2 rounded ml-2"
+              >
+                Cancel
+              </button>
+            </div>
+          )}
         </div>
       )}
     </div>

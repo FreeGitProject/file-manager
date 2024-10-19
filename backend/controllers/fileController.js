@@ -375,11 +375,15 @@ const renameFile = async (req, res) => {
         return res.status(404).json({ success: false, message: 'File not found' });
       }
         // Extract the current folder path from the public_id
-        //const currentFolderPath = file.public_id.substring(0, file.public_id.lastIndexOf("/"));
+        const currentFolderPath1 = file.public_id.substring(0, file.public_id.lastIndexOf("/"));
         const currentFolderPath = file.folder;
 
         // Combine the current folder path with the new name
-        const newFullPath = `${currentFolderPath}/${newName}`;
+        let newFullPath='';
+        if(currentFolderPath)
+         newFullPath = `${currentFolderPath}/${newName}`;
+        else
+        newFullPath=newName;
       // Rename the file
       const renamedFile = await cloudinary.uploader.rename(file.public_id, newFullPath);
   
