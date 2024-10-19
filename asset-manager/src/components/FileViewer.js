@@ -15,7 +15,7 @@ const FileViewer = ({ selectedFolder }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState(""); // For search query
   const fetchFiles = async () => {
-    // console.log("!selectedFolder", selectedFolder);
+    console.log("!selectedFolder", selectedFolder);
     if (selectedFolder === "Home") {
       setIsLoading(true);
       // Fetch root files when no folder is selected (Home view)
@@ -47,7 +47,7 @@ const FileViewer = ({ selectedFolder }) => {
       return;
     }
     //here set selectedFolder root directory folder ""
-   // if (selectedFolder === "Home") selectedFolder = "";
+    // if (selectedFolder === "Home") selectedFolder = "";
 
     setIsUploading(true); // Set uploading state to true
     const formData = new FormData();
@@ -59,13 +59,11 @@ const FileViewer = ({ selectedFolder }) => {
       if (response.success) {
         // Reload files after successful upload
         alert(response.message);
-        console.log(selectedFolder,"selectedFolderupload")
-        if (selectedFolder === "Home")
-          {
-              // Fetch root files when no folder is selected (Home view)
+        console.log(selectedFolder, "selectedFolderupload");
+        if (selectedFolder === "Home") {
+          // Fetch root files when no folder is selected (Home view)
           const resources = await rootResources();
-        }else{
-
+        } else {
           const resources = await getResourcesByFolderPath(selectedFolder);
           setFiles(resources);
         }
@@ -114,7 +112,7 @@ const FileViewer = ({ selectedFolder }) => {
     e.preventDefault();
     if (searchQuery.trim()) {
       try {
-        if (selectedFolder === "Home") selectedFolder = "";
+        // if (selectedFolder === "Home") selectedFolder = "";
         const results = await searchResources(searchQuery, selectedFolder);
 
         // console.log(results)

@@ -1,6 +1,6 @@
-import axios from 'axios';
+import axios from "axios";
 
-const API_BASE_URL = 'http://localhost:5000/api/files';
+const API_BASE_URL = "http://localhost:5000/api/files";
 
 // Fetch root folders
 export const getRootFolders = async () => {
@@ -11,33 +11,39 @@ export const getRootFolders = async () => {
 // Fetch subfolders
 export const getSubFolders = async (folderPath) => {
   //const response = await axios.get(`${API_BASE_URL}/getSubFolders/${folderPath}`);
-  const response = await axios.get(`${API_BASE_URL}/getSubFolders`,{ params:{folder: folderPath} });
+  const response = await axios.get(`${API_BASE_URL}/getSubFolders`, {
+    params: { folder: folderPath },
+  });
   return response.data.subfolders;
 };
 
 // Fetch resources (files) by folder path
 export const getResourcesByFolderPath = async (folderPath) => {
   const response = await axios.get(`${API_BASE_URL}/getResourcesByFolderPath`, {
-    params: { folder_path: folderPath }
+    params: { folder_path: folderPath },
   });
   return response.data.resources;
 };
 
 // Create a new folder
 export const createFolder = async (folderName) => {
-  const response = await axios.post(`${API_BASE_URL}/createFolder`, { folder: folderName });
+  const response = await axios.post(`${API_BASE_URL}/createFolder`, {
+    folder: folderName,
+  });
   return response.data;
 };
 
 // Delete a folder
 export const deleteFolder = async (folderPath) => {
-  const response = await axios.delete(`${API_BASE_URL}/deleteFolder`, { params:{folder: folderPath} });
+  const response = await axios.delete(`${API_BASE_URL}/deleteFolder`, {
+    params: { folder: folderPath },
+  });
   return response.data;
 };
 export const uploadImageToFolder = async (formData) => {
   const response = await axios.post(`${API_BASE_URL}/uploadImage`, formData, {
     headers: {
-      'Content-Type': 'multipart/form-data',
+      "Content-Type": "multipart/form-data",
     },
   });
   //console.log(response.data)
@@ -45,17 +51,19 @@ export const uploadImageToFolder = async (formData) => {
 };
 // Delete file by public_id
 export const deleteFileByPublicId = async (publicId) => {
-  const response = await axios.delete(`${API_BASE_URL}/deleteFile`, { params:{public_id: publicId} });
+  const response = await axios.delete(`${API_BASE_URL}/deleteFile`, {
+    params: { public_id: publicId },
+  });
   return response.data;
 };
 //
 // Fetch root folders
-export const rootResources  = async () => {
+export const rootResources = async () => {
   const response = await axios.get(`${API_BASE_URL}/root-resources `);
   return response.data;
 };
 // Search resources by filename or public ID
-export const searchResources = async (searchQuery,selectedFolder) => {
+export const searchResources = async (searchQuery, selectedFolder) => {
   try {
     const response = await axios.post(`${API_BASE_URL}/search-resources`, {
       query: searchQuery,
@@ -63,7 +71,7 @@ export const searchResources = async (searchQuery,selectedFolder) => {
     });
     return response.data;
   } catch (error) {
-    console.error('Error searching files:', error);
+    console.error("Error searching files:", error);
     throw error;
   }
 };

@@ -6,21 +6,20 @@ const maxResults = 10; // Optional: specify max results
 const nextCursor = ""; // Optional: specify the next cursor for pagination
 
 const FolderTree = ({ onSelectFolder }) => {
-  const [folders, setFolders] = useState([]);
-  const [expandedFolders, setExpandedFolders] = useState({});
-  const [newFolderName, setNewFolderName] = useState('');
-  const [folderToDelete, setFolderToDelete] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const [folders, setFolders] = useState([]); // Store root folders
+  const [expandedFolders, setExpandedFolders] = useState({}); // Store expanded state of folders
+  const [newFolderName, setNewFolderName] = useState(''); // Store new folder name for creation
+  const [folderToDelete, setFolderToDelete] = useState(''); // Store folder to delete
+  const [isLoading, setIsLoading] = useState(false); // Loading state
+  const [isHomeExpanded, setIsHomeExpanded] = useState(false); // Track if "Home" is expanded
 
-  useEffect(() => {
-    const fetchFolders = async () => {
-      setIsLoading(true);
-      const rootFolders = await getRootFolders();
-      setFolders(rootFolders);
-      setIsLoading(false);
-    };
-    fetchFolders();
-  }, []);
+  // Fetch root folders when "Home" is clicked
+  const fetchRootFolders = async () => {
+    setIsLoading(true);
+    const rootFolders = await getRootFolders();
+    setFolders(rootFolders);
+    setIsLoading(false);
+  };
 
   const toggleFolder = async (folderPath) => {
     if (!expandedFolders[folderPath]) {
@@ -55,7 +54,17 @@ const FolderTree = ({ onSelectFolder }) => {
     }
   };
 
-  const renderFolders = (folderList, parentPath = '') => (
+  const toggleHome = async () => {
+    
+    if (!isHomeExpanded) {
+      await fetchRootFolders(); // Fetch folders when expanding Home
+    }
+    setIsHomeExpanded(!isHomeExpanded); // Toggle Home expanded state
+    // Call onSelectFolder with "Home" as the selected folder
+    onSelectFolder('Home');
+  };
+
+  const renderFolders = (folderList) => (
     folderList.map(folder => (
       <div key={folder.path} className="ml-4">
         <span className="flex items-center cursor-pointer" onClick={() => toggleFolder(folder.path)}>
@@ -73,12 +82,18 @@ const FolderTree = ({ onSelectFolder }) => {
 
   return (
     <div>
-    {isLoading ? (
-      <p>Loading files...</p>
-    ) : (
-      <div>
+      {/* Home root button with toggle */}
       <h3 className="text-lg font-bold mb-2">Folder Structure</h3>
-      <div>{renderFolders(folders)}</div>
+      <div className="flex items-center cursor-pointer" onClick={toggleHome}>
+        <FaFolder className="mr-2" /> {/* Folder icon */}
+        {isHomeExpanded ? '-' : '+'} Home {/* Toggle icon */}
+      </div>
+
+      {/* Show Loading Folders... under Home if loading */}
+      {isHomeExpanded && isLoading && <p className="ml-4">Loading Folders...</p>}
+
+      {/* Render folders only if "Home" is expanded and not loading */}
+      {isHomeExpanded && !isLoading && renderFolders(folders)}
 
       {/* Create Folder Form */}
       <form onSubmit={handleCreateFolder} className="mt-4">
@@ -109,9 +124,6 @@ const FolderTree = ({ onSelectFolder }) => {
         </button>
       </div>
     </div>
-    )}
-  </div>
-
   );
 };
 
