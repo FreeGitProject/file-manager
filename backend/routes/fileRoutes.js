@@ -15,6 +15,7 @@ const {
   getResourcesByPaginationFolderPath,
   searchResources,
   renameFile,
+  rootResourcesWithPagination,
 } = require("../controllers/fileController");
 const multer = require("multer");
 const { storage } = require("../config/cloudinary");
@@ -27,6 +28,7 @@ const upload = multer({ storage });
 router.post("/uploadImage", upload.single("image"), uploadFile);
 // Route to get the list of uploaded files in root-Resources
 router.get("/root-resources", rootResources);
+router.get("/root-resources-pagination", rootResourcesWithPagination);
 // Delete file route
 router.delete("/deleteFile", deleteFile); // <-- New route for deleting a file by public ID
 

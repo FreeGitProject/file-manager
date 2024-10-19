@@ -24,7 +24,17 @@ export const getResourcesByFolderPath = async (folderPath) => {
   });
   return response.data.resources;
 };
-
+// Fetch resources (files) by folder path with pagination
+export const getResourcesByPaginationFolderPath = async (folderPath, maxResults = 10, nextCursor = null) => {
+  const response = await axios.get(`${API_BASE_URL}/getResourcesByPaginationFolderPath`, {
+    params: {
+      folder_path: folderPath,
+      max_results: maxResults,
+      next_cursor: nextCursor
+    },
+  });
+  return response.data;
+};
 // Create a new folder
 export const createFolder = async (folderName) => {
   const response = await axios.post(`${API_BASE_URL}/createFolder`, {
@@ -73,6 +83,16 @@ export const deleteFileByPublicId = async (publicId) => {
 // Fetch root folders
 export const rootResources = async () => {
   const response = await axios.get(`${API_BASE_URL}/root-resources `);
+  return response.data;
+};
+// Fetch root folders
+export const rootResourcesWithPagination = async ( maxResults = 10, nextCursor = null) => {
+  const response = await axios.get(`${API_BASE_URL}/root-resources-pagination`,{
+    params: {
+      max_results: maxResults,
+      next_cursor: nextCursor
+    },
+  });
   return response.data;
 };
 // Search resources by filename or public ID

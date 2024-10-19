@@ -40,6 +40,26 @@ const rootResources = async (req, res) => {
     res.status(500).json({ message: "Error fetching files", error });
   }
 };
+// Handle fetching the list of files root-Resources with Pagination
+const rootResourcesWithPagination = async (req, res) => {
+  try {
+    const {  max_results = 10, next_cursor } = req.query; // Optional query parameters with default max_results
+    const result = await cloudinary.search
+      .expression('folder:""') // Filter by folder
+      .sort_by("public_id", "desc")
+      .max_results(max_results)
+      .next_cursor(next_cursor)
+      .execute();
+
+    res.status(200).json({
+      success: true,
+      resources: result.resources,
+      next_cursor: result.next_cursor,
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching files", error });
+  }
+};
 
 // Handle file deletion
 const deleteFile = async (req, res) => {
@@ -521,4 +541,5 @@ module.exports = {
   getResourcesByExternalId,
   getResourcesByPaginationFolderPath,
   renameFile,
+  rootResourcesWithPagination
 };
