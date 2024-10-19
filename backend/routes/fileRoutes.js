@@ -26,12 +26,11 @@ const upload = multer({ storage });
 // Route to upload a file
 //router.post('/upload', upload.single('file'), uploadFile);
 router.post("/uploadImage", upload.single("image"), uploadFile);
-// Route to get the list of uploaded files in root-Resources
+// Route to get the list of uploaded files in root-Resources only For Home 
 router.get("/root-resources", rootResources);
 router.get("/root-resources-pagination", rootResourcesWithPagination);
 // Delete file route
 router.delete("/deleteFile", deleteFile); // <-- New route for deleting a file by public ID
-
 //router.get("/files/folder/:folderName", getFilesInFolder); // New route for fetching files in a folder
 // Define the route for fetching root folders
 router.get("/getRootFolders", getRootFolders);
