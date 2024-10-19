@@ -359,6 +359,40 @@ const searchResources = async (req, res) => {
     res.status(500).json({ message: "Error searching files", error });
   }
 };
+// Rename a file by asset_id
+const renameFile = async (req, res) => {
+    try {
+      const { asset_id, newName } = req.body;
+  
+      if (!asset_id || !newName) {
+        return res.status(400).json({ success: false, message: 'Asset ID and new name are required' });
+      }
+  
+      // Find the file by asset_id and rename it
+      const file = await cloudinary.api.resource_by_asset_id(asset_id);
+  
+      if (!file) {
+        return res.status(404).json({ success: false, message: 'File not found' });
+      }
+        // Extract the current folder path from the public_id
+        //const currentFolderPath = file.public_id.substring(0, file.public_id.lastIndexOf("/"));
+        const currentFolderPath = file.folder;
+
+        // Combine the current folder path with the new name
+        const newFullPath = `${currentFolderPath}/${newName}`;
+      // Rename the file
+      const renamedFile = await cloudinary.uploader.rename(file.public_id, newFullPath);
+  
+      res.status(200).json({
+        success: true,
+        message: 'File renamed successfully',
+        renamedFile
+      });
+    } catch (error) {
+      console.error('Error renaming file:', error);
+      res.status(500).json({ success: false, message: 'An error occurred while renaming the file' });
+    }
+  };
 // Sample folders (this would typically come from your database or a service)
 const folders = [
   {
@@ -482,4 +516,5 @@ module.exports = {
   getResourcesByFolderPath,
   getResourcesByExternalId,
   getResourcesByPaginationFolderPath,
+  renameFile,
 };

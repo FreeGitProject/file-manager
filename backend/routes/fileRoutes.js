@@ -14,6 +14,7 @@ const {
   getResourcesByExternalId,
   getResourcesByPaginationFolderPath,
   searchResources,
+  renameFile,
 } = require("../controllers/fileController");
 const multer = require("multer");
 const { storage } = require("../config/cloudinary");
@@ -45,7 +46,8 @@ router.get(
   "/getResourcesByPaginationFolderPath",
   getResourcesByPaginationFolderPath
 );
-
+// Route to rename a file
+router.put('/renameFile', renameFile);
 // Route for getting resources by external_id
 router.get("/resources/by-external-id", getResourcesByExternalId);
 // Route to search files by query

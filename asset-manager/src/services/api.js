@@ -88,3 +88,18 @@ export const searchResources = async (searchQuery, selectedFolder) => {
     throw error;
   }
 };
+
+export const  renameFileById = async (asset_id, newName) => {
+  try {
+    const response = await axios.put(`${API_BASE_URL}/renameFile`, {
+      asset_id,
+      newName
+    });
+    // if (response.data.success) {
+    //   alert(response.data.message);
+    // }
+    return response.data;
+  } catch (error) {
+    console.error('Error renaming file:', error);
+  }
+};

@@ -6,6 +6,7 @@ import {
   rootResources,
   searchResources,
 } from "../services/api"; // Import rootResources API
+import { FaFilePdf, FaFileExcel } from "react-icons/fa";
 
 const FileViewer = ({ selectedFolder }) => {
   const [files, setFiles] = useState([]);
@@ -52,11 +53,11 @@ const FileViewer = ({ selectedFolder }) => {
     setIsUploading(true); // Set uploading state to true
     const formData = new FormData();
     formData.append("image", selectedFile); // Append selected image file
-   // formData.append("folder", selectedFolder); // Append folder name
+    // formData.append("folder", selectedFolder); // Append folder name
 
     try {
-       // Pass the folder as a query parameter in the URL
-    const response = await uploadImageToFolder(formData, selectedFolder);
+      // Pass the folder as a query parameter in the URL
+      const response = await uploadImageToFolder(formData, selectedFolder);
       if (response.success) {
         // Reload files after successful upload
         alert(response.message);
@@ -126,7 +127,7 @@ const FileViewer = ({ selectedFolder }) => {
       await fetchFiles();
     }
   };
-  //return (<div>ss</div>)
+
   return (
     <div>
       {isLoading ? (
@@ -174,29 +175,44 @@ const FileViewer = ({ selectedFolder }) => {
               files.map((file) => (
                 <div
                   key={file.asset_id}
-                  className="border rounded-lg shadow-md p-4"
+                  className="border rounded-lg shadow-md p-4 flex flex-col items-center"
                 >
-                  {/* Image Thumbnail */}
-                  <img
-                    src={file.secure_url}
-                    alt={file.public_id}
-                    className="w-full h-40 object-cover rounded mb-2"
-                  />
-                  <h4 className="text-xl font-semibold mb-2">
+                  {/* File Thumbnail or Icon */}
+                  {file.format === "pdf" ? (
+                    <div className="flex justify-center items-center h-40">
+                      <FaFilePdf className="text-red-500 text-6xl mb-2" />
+                    </div>
+                  ) : file.format === "xlsx" || file.format === "xls" ? (
+                    <div className="flex justify-center items-center h-40">
+                      <FaFileExcel className="text-green-500 text-6xl mb-2" />
+                    </div>
+                  ) : (
+                    <img
+                      src={file.secure_url}
+                      alt={file.public_id}
+                      className="w-full h-40 object-cover rounded mb-2"
+                    />
+                  )}
+
+                  <h4 className="text-xl font-semibold mb-2 text-center">
                     {file.public_id
                       ? file.public_id.split("/").pop().trim()
                       : "Unnamed File"}
                   </h4>
-                  <p className="text-gray-600">
+                  <p className="text-gray-600 text-center">
                     Size: {Math.round(file.bytes / 1024)} KB
                   </p>
-                  <p className="text-gray-600">Folder: {file.folder}</p>
-                  <p className="text-gray-600">Format: {file.format}</p>
+                  <p className="text-gray-600 text-center">
+                    Folder: {file.folder}
+                  </p>
+                  <p className="text-gray-600 text-center">
+                    Format: {file.format}
+                  </p>
                   <a
                     href={file.secure_url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-blue-600 hover:underline mt-2 block"
+                    className="text-blue-600 hover:underline mt-2 block text-center"
                   >
                     View File
                   </a>
