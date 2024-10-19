@@ -15,6 +15,8 @@ const {
   getResourcesByPaginationFolderPath,
   searchResources,
   renameFile,
+  rootResourcesWithPagination,
+  getFileDetailsByAssetId,
 } = require("../controllers/fileController");
 const multer = require("multer");
 const { storage } = require("../config/cloudinary");
@@ -25,12 +27,12 @@ const upload = multer({ storage });
 // Route to upload a file
 //router.post('/upload', upload.single('file'), uploadFile);
 router.post("/uploadImage", upload.single("image"), uploadFile);
-// Route to get the list of uploaded files in root-Resources
+// Route to get the list of uploaded files in root-Resources only For Home 
 router.get("/root-resources", rootResources);
+router.get("/root-resources-pagination", rootResourcesWithPagination);
 // Delete file route
 router.delete("/deleteFile", deleteFile); // <-- New route for deleting a file by public ID
-
-router.get("/files/folder/:folderName", getFilesInFolder); // New route for fetching files in a folder
+//router.get("/files/folder/:folderName", getFilesInFolder); // New route for fetching files in a folder
 // Define the route for fetching root folders
 router.get("/getRootFolders", getRootFolders);
 // Define the route for fetching subfolders of a specified parent folder
@@ -48,8 +50,9 @@ router.get(
 );
 // Route to rename a file
 router.put('/renameFile', renameFile);
+router.get('/getFileDetailsByAssetId', getFileDetailsByAssetId);
 // Route for getting resources by external_id
-router.get("/resources/by-external-id", getResourcesByExternalId);
+//router.get("/resources/by-external-id", getResourcesByExternalId);
 // Route to search files by query
 router.post("/search-resources", searchResources);
 module.exports = router;

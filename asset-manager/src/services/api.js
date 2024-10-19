@@ -24,7 +24,17 @@ export const getResourcesByFolderPath = async (folderPath) => {
   });
   return response.data.resources;
 };
-
+// Fetch resources (files) by folder path with pagination
+export const getResourcesByPaginationFolderPath = async (folderPath, maxResults = 10, nextCursor = null) => {
+  const response = await axios.get(`${API_BASE_URL}/getResourcesByPaginationFolderPath`, {
+    params: {
+      folder_path: folderPath,
+      max_results: maxResults,
+      next_cursor: nextCursor
+    },
+  });
+  return response.data;
+};
 // Create a new folder
 export const createFolder = async (folderName) => {
   const response = await axios.post(`${API_BASE_URL}/createFolder`, {
@@ -75,6 +85,16 @@ export const rootResources = async () => {
   const response = await axios.get(`${API_BASE_URL}/root-resources `);
   return response.data;
 };
+// Fetch root folders
+export const rootResourcesWithPagination = async ( maxResults = 10, nextCursor = null) => {
+  const response = await axios.get(`${API_BASE_URL}/root-resources-pagination`,{
+    params: {
+      max_results: maxResults,
+      next_cursor: nextCursor
+    },
+  });
+  return response.data;
+};
 // Search resources by filename or public ID
 export const searchResources = async (searchQuery, selectedFolder) => {
   try {
@@ -101,5 +121,17 @@ export const  renameFileById = async (asset_id, newName) => {
     return response.data;
   } catch (error) {
     console.error('Error renaming file:', error);
+  }
+};
+// Fetch file details by asset_id
+export const getFileDetailsByAssetId = async (asset_id) => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/getFileDetailsByAssetId`, {
+      params: { asset_id },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching file details:", error);
+    throw error;
   }
 };

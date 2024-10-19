@@ -40,6 +40,26 @@ const rootResources = async (req, res) => {
     res.status(500).json({ message: "Error fetching files", error });
   }
 };
+// Handle fetching the list of files root-Resources with Pagination
+const rootResourcesWithPagination = async (req, res) => {
+  try {
+    const {  max_results = 10, next_cursor } = req.query; // Optional query parameters with default max_results
+    const result = await cloudinary.search
+      .expression('folder:""') // Filter by folder
+      .sort_by("public_id", "desc")
+      .max_results(max_results)
+      .next_cursor(next_cursor)
+      .execute();
+
+    res.status(200).json({
+      success: true,
+      resources: result.resources,
+      next_cursor: result.next_cursor,
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching files", error });
+  }
+};
 
 // Handle file deletion
 const deleteFile = async (req, res) => {
@@ -397,6 +417,26 @@ const renameFile = async (req, res) => {
       res.status(500).json({ success: false, message: 'An error occurred while renaming the file' });
     }
   };
+  const getFileDetailsByAssetId = async (req,res)=>{
+    const { asset_id } = req.query;
+
+  if (!asset_id) {
+    return res.status(400).json({ success: false, message: "Asset ID is required" });
+  }
+
+  try {
+    // Get the file details from Cloudinary using the asset_id
+    const fileDetails = await cloudinary.api.resource_by_asset_id(asset_id);//await cloudinary.api.resource(asset_id);
+
+    res.status(200).json({
+      success: true,
+      data: fileDetails,
+    });
+  } catch (error) {
+    console.error("Error fetching file details:", error);
+    res.status(500).json({ success: false, message: "An error occurred while fetching file details" });
+  }
+  }
 // Sample folders (this would typically come from your database or a service)
 const folders = [
   {
@@ -521,4 +561,6 @@ module.exports = {
   getResourcesByExternalId,
   getResourcesByPaginationFolderPath,
   renameFile,
+  rootResourcesWithPagination,
+  getFileDetailsByAssetId
 };

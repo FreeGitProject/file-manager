@@ -1,13 +1,17 @@
 import React, { useState, useEffect } from "react";
 import {
   getResourcesByFolderPath,
+  getResourcesByPaginationFolderPath, // Function for fetching paginated resources
   uploadImageToFolder,
   deleteFileByPublicId,
   rootResources,
+  rootResourcesWithPagination,
   searchResources,
   renameFileById, // Import your rename function here
+  getFileDetailsByAssetId, // Import the API to get file details
 } from "../services/api"; // Import rootResources API
 import { FaFilePdf, FaFileExcel } from "react-icons/fa";
+import FileDetailModal from "./FileDetailModal";
 
 const FileViewer = ({ selectedFolder }) => {
   const [files, setFiles] = useState([]);
@@ -18,19 +22,35 @@ const FileViewer = ({ selectedFolder }) => {
   const [searchQuery, setSearchQuery] = useState(""); // For search query
   const [newFileName, setNewFileName] = useState(""); // State for new file name
   const [renamingFileId, setRenamingFileId] = useState(null); // State for the file being renamed
+  const [nextCursor, setNextCursor] = useState(null); // State to track pagination cursor
+  const [hasMoreFiles, setHasMoreFiles] = useState(true); // To check if there are more files to load
+  const [showModal, setShowModal] = useState(false); // Modal state
+  const [fileDetails, setFileDetails] = useState(null); // Store file details for modal
 
-  const fetchFiles = async () => {
+  // Fetch files with pagination
+  const fetchFiles = async (append = false) => {
     console.log("!selectedFolder", selectedFolder);
     if (selectedFolder === "Home") {
       setIsLoading(true);
       // Fetch root files when no folder is selected (Home view)
-      const resources = await rootResources();
-      setFiles(resources);
+      const { resources, next_cursor } = await rootResourcesWithPagination(5,nextCursor);
+      setFiles(append ? [...files, ...resources] : resources);
+
       setIsLoading(false);
     } else {
       setIsLoading(true);
-      const resources = await getResourcesByFolderPath(selectedFolder);
-      setFiles(resources);
+      try {
+        const { resources, next_cursor } = await getResourcesByPaginationFolderPath(
+          selectedFolder,
+          5, // Fetch 10 files per page
+          nextCursor // Pass the current cursor for pagination
+        );
+        setFiles(append ? [...files, ...resources] : resources);
+        setNextCursor(next_cursor); // Update next cursor
+        setHasMoreFiles(!!next_cursor); // Check if more files exist
+      } catch (error) {
+        console.error("Error fetching files:", error);
+      }
       setIsLoading(false);
     }
   };
@@ -38,6 +58,12 @@ const FileViewer = ({ selectedFolder }) => {
     fetchFiles();
   }, [selectedFolder]);
 
+    // Load more files (next page)
+    const loadMoreFiles = async () => {
+      if (hasMoreFiles) {
+        await fetchFiles(true);
+      }
+    };
   // Handle file selection
   const handleFileChange = (e) => {
     setSelectedFile(e.target.files[0]);
@@ -68,10 +94,10 @@ const FileViewer = ({ selectedFolder }) => {
         console.log(selectedFolder, "selectedFolderupload");
         if (selectedFolder === "Home") {
           // Fetch root files when no folder is selected (Home view)
-          const resources = await rootResources();
+          const { resources} = await rootResourcesWithPagination(5,nextCursor);
           setFiles(resources);
         } else {
-          const resources = await getResourcesByFolderPath(selectedFolder);
+          const { resources}= await getResourcesByPaginationFolderPath(selectedFolder);
           setFiles(resources);
         }
         setSelectedFile(null); // Reset selected file
@@ -151,6 +177,16 @@ const handleRenameFile = async (fileId) => {
   } catch (error) {
     console.error("Error renaming file:", error);
     alert("An error occurred while renaming the file.");
+  }
+};
+ // Handle showing the modal with file details
+ const handleShowDetails = async (assetId) => {
+  try {
+    const details = await getFileDetailsByAssetId(assetId); // Fetch file details by asset_id
+    setFileDetails(details.data); // Store the details for the modal
+    setShowModal(true); // Show the modal
+  } catch (error) {
+    console.error("Error fetching file details:", error);
   }
 };
   return (
@@ -257,14 +293,33 @@ const handleRenameFile = async (fileId) => {
                   >
                     {isDeleting ? "Deleting..." : "Delete File"}
                   </button>
+                  <button
+                    onClick={() => handleShowDetails(file.asset_id)} // Show file details in modal
+                    className="bg-blue-500 text-white p-2 rounded mt-2"
+                  >
+                    View Details
+                  </button>
                 </div>
               ))
             ) : (
               <p className="text-gray-600">No files found in this folder.</p>
             )}
           </div>
-          {/* Renaming Input */}
-          {renamingFileId && (
+         {/* Pagination Control */}
+         {hasMoreFiles && (
+            <div className="mt-4 text-center">
+              <button
+                onClick={loadMoreFiles}
+                className="bg-blue-500 text-white p-2 rounded"
+              >
+                {isLoading ? "Loading more..." : "Load More Files"}
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+         {/* Renaming Input */}
+         {renamingFileId && (
             <div className="mt-4">
               <input
                 type="text"
@@ -290,8 +345,14 @@ const handleRenameFile = async (fileId) => {
               </button>
             </div>
           )}
-        </div>
-      )}
+
+           {/* Modal to show file details */}
+           {showModal && fileDetails && (
+            <FileDetailModal
+              fileDetails={fileDetails}
+              onClose={() => setShowModal(false)}
+            />
+          )}
     </div>
   );
 };
