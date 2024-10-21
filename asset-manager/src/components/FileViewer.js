@@ -60,7 +60,7 @@ const FileViewer = ({ selectedFolder }) => {
         setFiles(append ? [...files, ...resources] : resources);
         nextCursor = next_cursor;
         setHasMoreFiles(!!next_cursor);
-        console.log(hasMoreFiles,"next_cursor",next_cursor);
+        console.log(hasMoreFiles, "next_cursor", next_cursor);
       }
     } catch (error) {
       console.error("Error fetching files:", error);
@@ -81,9 +81,9 @@ const FileViewer = ({ selectedFolder }) => {
   // Load more files (next page)
   const loadMoreFiles = async () => {
     if (hasMoreFiles) {
-    //  setIsLoadingMore(true); // Set loading more state to true
+      //  setIsLoadingMore(true); // Set loading more state to true
       await fetchFiles(true); // Fetch more files
-    //  setIsLoadingMore(false); // Reset loading more state
+      //  setIsLoadingMore(false); // Reset loading more state
     }
   };
   // Handle file selection
@@ -267,12 +267,12 @@ const FileViewer = ({ selectedFolder }) => {
       </div>
 
       {/* Files Section */}
-      <div className="flex-1 overflow-y-auto">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-4">
-          {isLoading ? (
-            <LoadingSpinner /> // Show spinner while loading files
-          ) : files?.length > 0 ? (
-            files.map((file) => (
+      <div className="flex-1 overflow-y-auto p-4">
+        {isLoading ? (
+          <LoadingSpinner /> // Show spinner while loading files
+        ) : files?.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {files.map((file) => (
               <div
                 key={file.asset_id}
                 className="border rounded-lg shadow-lg p-5 flex flex-col items-center bg-white transition-transform transform hover:scale-105 relative"
@@ -353,13 +353,15 @@ const FileViewer = ({ selectedFolder }) => {
                   )}
                 </div>
               </div>
-            ))
-          ) : (
+            ))}
+          </div>
+        ) : (
+          <div className="flex justify-center items-center h-96">
             <p className="text-gray-500 text-center">
               No files found in this folder.
             </p>
-          )}
-        </div>
+          </div>
+        )}
 
         {/* Pagination Control */}
         {hasMoreFiles && (
