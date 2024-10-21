@@ -36,8 +36,8 @@ const initialFolders: FolderType = {
       { id: 'report', name: 'Report.docx', type: 'docx', size: 2048000, lastModified: new Date('2023-03-20') }
     ]},
     { id: 'images', name: 'Images', children: [
-      { id: 'vacation', name: 'Vacation.jpg', type: 'jpg', size: 3072000, lastModified: new Date('2023-05-10'), url: 'https://picsum.photos/200/300' },
-      { id: 'profile', name: 'Profile.png', type: 'png', size: 1536000, lastModified: new Date('2023-06-05'), url: 'https://picsum.photos/200/300' }
+      { id: 'vacation', name: 'Vacation.jpg', type: 'jpg', size: 3072000, lastModified: new Date('2023-05-10'), url: 'http://res.cloudinary.com/dzabikj6s/image/upload/v1714132547/joker5453.jpg' },
+      { id: 'profile', name: 'Profile.png', type: 'png', size: 1536000, lastModified: new Date('2023-06-05'), url: 'http://res.cloudinary.com/dzabikj6s/image/upload/v1729318692/new_file_namerishab.jpg' }
     ]},
     { id: 'videos', name: 'Videos', children: [
       { id: 'tutorial', name: 'Tutorial.mp4', type: 'mp4', size: 10240000, lastModified: new Date('2023-04-01') }

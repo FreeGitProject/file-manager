@@ -10,6 +10,7 @@ import {
 import FileDetailModal from "./FileDetailModal";
 import { LoadingSpinner } from "./Loader/LoadingSpinner";
 import RenameFileModal from "./RenameFileModal";
+import { MoreVertical } from "lucide-react";
 import React, { useState, useEffect } from "react";
 import { FaFilePdf, FaFileExcel } from "react-icons/fa";
 
@@ -28,6 +29,7 @@ const FileViewer = ({ selectedFolder }) => {
   const [hasMoreFiles, setHasMoreFiles] = useState(true); // To check if there are more files to load
   const [showModal, setShowModal] = useState(false); // Modal state
   const [fileDetails, setFileDetails] = useState(null); // Store file details for modal
+  const [dropdownOpen, setDropdownOpen] = useState(null); // State for toggling dropdown per file
 
   // Fetch files with pagination
   const fetchFiles = async (append = false) => {
@@ -196,6 +198,9 @@ const FileViewer = ({ selectedFolder }) => {
       console.error("Error fetching file details:", error);
     }
   };
+  const toggleDropdown = (assetId) => {
+    setDropdownOpen(dropdownOpen === assetId ? null : assetId); // Toggle dropdown for each file
+  };
   return (
     <div>
       {isLoading ? (
@@ -279,46 +284,63 @@ const FileViewer = ({ selectedFolder }) => {
                       className="w-full h-40 object-cover rounded mb-4 shadow-md"
                     />
                   )}
+                  <div className="w-full">
+                    {/* File Name */}
+                    <h4 className="text-xl font-semibold text-start mb-2">
+                      {file.public_id
+                        ? file.public_id.split("/").pop().trim()
+                        : "Unnamed File"}
+                    </h4>
 
-                  {/* File Information */}
-                  <h4 className="text-xl font-semibold mb-1 text-center truncate">
-                    {file.public_id
-                      ? file.public_id.split("/").pop().trim()
-                      : "Unnamed File"}
-                  </h4>
-                  <p className="text-gray-500 text-sm text-center">
-                    Folder: {file.folder}
-                  </p>
-                  <p className="text-gray-500 text-sm text-center">
-                    Format: {file.format}
-                  </p>
+                    {/* Folder and Format on the same line, justified between */}
+                    <div className="flex justify-between text-sm text-gray-500">
+                      <p>{file.folder}</p>
+                      <p>{file.format}</p>
+                    </div>
+                  </div>
 
-                  {/* Actions */}
-                  <div className="mt-4 w-full space-y-2">
-                    <button
-                      onClick={() => {
-                        setRenamingFileId(file.asset_id);
-                        setRenamingFileName(
-                          file.public_id.split("/").pop().trim()
-                        );
-                      }}
-                      className="w-full bg-yellow-400 hover:bg-yellow-500 text-white py-2 rounded-md transition"
-                    >
-                      Rename File
-                    </button>
-                    <button
-                      onClick={() => handleDeleteFile(file.public_id)}
-                      className="w-full bg-red-500 hover:bg-red-600 text-white py-2 rounded-md transition"
-                      disabled={isDeleting}
-                    >
-                      {isDeleting ? "Deleting..." : "Delete File"}
-                    </button>
-                    <button
-                      onClick={() => handleShowDetails(file.asset_id)}
-                      className="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-md transition"
-                    >
-                      View Details
-                    </button>
+                  {/* MoreVertical Icon and Dropdown */}
+                  <div className="absolute top-2 right-2">
+                    <MoreVertical
+                      className="h-6 w-6 cursor-pointer"
+                      onClick={() => toggleDropdown(file.asset_id)}
+                    />
+                    {dropdownOpen === file.asset_id && (
+                      <div className="absolute top-8 right-0 w-32 bg-white border rounded shadow-lg z-10">
+                        <ul>
+                          <li
+                            className="p-2 hover:bg-gray-100 cursor-pointer"
+                            onClick={() => {
+                              setRenamingFileId(file.asset_id);
+                              setRenamingFileName(
+                                file.public_id.split("/").pop().trim()
+                              );
+                              setDropdownOpen(null); // Close dropdown
+                            }}
+                          >
+                            Rename
+                          </li>
+                          <li
+                            className="p-2 hover:bg-gray-100 cursor-pointer"
+                            onClick={() => {
+                              handleShowDetails(file.asset_id);
+                              setDropdownOpen(null); // Close dropdown
+                            }}
+                          >
+                            View Details
+                          </li>
+                          <li
+                            className="p-2 hover:bg-gray-100 cursor-pointer text-red-500"
+                            onClick={() => {
+                              handleDeleteFile(file.public_id);
+                              setDropdownOpen(null); // Close dropdown
+                            }}
+                          >
+                            Delete
+                          </li>
+                        </ul>
+                      </div>
+                    )}
                   </div>
                 </div>
               ))
