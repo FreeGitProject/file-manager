@@ -23,45 +23,54 @@ const FileViewer = ({ selectedFolder }) => {
   const [isUploading, setIsUploading] = useState(false); // Uploading state
   const [isDeleting, setIsDeleting] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [searchQuery, setSearchQuery] = useState(""); // For search query
   const [renamingFileId, setRenamingFileId] = useState(null); // State for the file being renamed
   const [renamingFileName, setRenamingFileName] = useState(""); // Store file name to rename
-  const [hasMoreFiles, setHasMoreFiles] = useState(true); // To check if there are more files to load
+  const [hasMoreFiles, setHasMoreFiles] = useState(false); // To check if there are more files to load
   const [showModal, setShowModal] = useState(false); // Modal state
   const [fileDetails, setFileDetails] = useState(null); // Store file details for modal
   const [dropdownOpen, setDropdownOpen] = useState(null); // State for toggling dropdown per file
 
-  // Fetch files with pagination
+  // Modify the fetchFiles function to use isLoading more clearly
   const fetchFiles = async (append = false) => {
-    console.log("!selectedFolder", selectedFolder);
-
-    if (selectedFolder === "Home") {
+    // Only set loading state if it's the initial fetch
+    if (!append) {
       setIsLoading(true);
-      // Fetch root files when no folder is selected (Home view)
-      const { resources, next_cursor } = await rootResourcesWithPagination(
-        maxsize,
-        nextCursor
-      );
-      setFiles(append ? [...files, ...resources] : resources);
-      nextCursor = next_cursor;
-      setHasMoreFiles(!!next_cursor);
-      setIsLoading(false);
     } else {
-      setIsLoading(true);
-      try {
+      setIsLoadingMore(true); // Only if appending
+    }
+
+    try {
+      if (selectedFolder === "Home") {
+        const { resources, next_cursor } = await rootResourcesWithPagination(
+          maxsize,
+          nextCursor
+        );
+        setFiles(append ? [...files, ...resources] : resources);
+        nextCursor = next_cursor;
+        setHasMoreFiles(!!next_cursor);
+      } else {
         const { resources, next_cursor } =
           await getResourcesByPaginationFolderPath(
             selectedFolder,
-            maxsize, // Fetch 6 files per page
-            nextCursor // Pass the current cursor for pagination
+            maxsize,
+            nextCursor
           );
         setFiles(append ? [...files, ...resources] : resources);
-        nextCursor = next_cursor; // Update next cursor
-        setHasMoreFiles(!!next_cursor); // Check if more files exist
-      } catch (error) {
-        console.error("Error fetching files:", error);
+        nextCursor = next_cursor;
+        setHasMoreFiles(!!next_cursor);
+        console.log(hasMoreFiles,"next_cursor",next_cursor);
       }
-      setIsLoading(false);
+    } catch (error) {
+      console.error("Error fetching files:", error);
+    } finally {
+      // Only reset loading state if you were loading more
+      if (!append) {
+        setIsLoading(false);
+      } else {
+        setIsLoadingMore(false);
+      }
     }
   };
   useEffect(() => {
@@ -72,7 +81,9 @@ const FileViewer = ({ selectedFolder }) => {
   // Load more files (next page)
   const loadMoreFiles = async () => {
     if (hasMoreFiles) {
-      await fetchFiles(true);
+    //  setIsLoadingMore(true); // Set loading more state to true
+      await fetchFiles(true); // Fetch more files
+    //  setIsLoadingMore(false); // Reset loading more state
     }
   };
   // Handle file selection
@@ -258,11 +269,13 @@ const FileViewer = ({ selectedFolder }) => {
       {/* Files Section */}
       <div className="flex-1 overflow-y-auto">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-4">
-          {files?.length > 0 ? (
+          {isLoading ? (
+            <LoadingSpinner /> // Show spinner while loading files
+          ) : files?.length > 0 ? (
             files.map((file) => (
               <div
                 key={file.asset_id}
-                className="border rounded-lg shadow-lg p-5 flex flex-col items-center bg-white transition-transform transform hover:scale-105"
+                className="border rounded-lg shadow-lg p-5 flex flex-col items-center bg-white transition-transform transform hover:scale-105 relative"
               >
                 {/* File Thumbnail or Icon */}
                 {file.format === "pdf" ? (
@@ -280,6 +293,7 @@ const FileViewer = ({ selectedFolder }) => {
                     className="w-full h-40 object-cover rounded mb-4 shadow-md"
                   />
                 )}
+
                 <div className="w-full">
                   {/* File Name */}
                   <h4 className="text-xl font-semibold text-start mb-2">
@@ -290,7 +304,7 @@ const FileViewer = ({ selectedFolder }) => {
 
                   {/* Folder and Format on the same line, justified between */}
                   <div className="flex justify-between text-sm text-gray-500">
-                    <p>{file.folder}</p>
+                    <p>{file.folder || "No Folder"}</p>
                     <p>{file.format}</p>
                   </div>
                 </div>
@@ -342,7 +356,7 @@ const FileViewer = ({ selectedFolder }) => {
             ))
           ) : (
             <p className="text-gray-500 text-center">
-             No files found in this folder.
+              No files found in this folder.
             </p>
           )}
         </div>
@@ -353,8 +367,9 @@ const FileViewer = ({ selectedFolder }) => {
             <button
               onClick={loadMoreFiles}
               className="bg-blue-500 text-white p-2 rounded"
+              disabled={isLoadingMore} // Disable button when loading more
             >
-              {isLoading ? <LoadingSpinner /> : "Load More Files"}
+              {isLoadingMore ? <LoadingSpinner /> : "Load More Files"}
             </button>
           </div>
         )}
