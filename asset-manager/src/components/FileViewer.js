@@ -14,6 +14,7 @@ import { FaFilePdf, FaFileExcel } from "react-icons/fa";
 import FileDetailModal from "./FileDetailModal";
 import { LoadingSpinner } from "./Loader/LoadingSpinner";
 const maxsize=6;
+let nextCursor=null;
 const FileViewer = ({ selectedFolder }) => {
   const [files, setFiles] = useState([]);
   const [selectedFile, setSelectedFile] = useState(null); // State for selected image file
@@ -23,7 +24,7 @@ const FileViewer = ({ selectedFolder }) => {
   const [searchQuery, setSearchQuery] = useState(""); // For search query
   const [newFileName, setNewFileName] = useState(""); // State for new file name
   const [renamingFileId, setRenamingFileId] = useState(null); // State for the file being renamed
-  const [nextCursor, setNextCursor] = useState(null); // State to track pagination cursor
+ // let [nextCursor, setNextCursor] = useState(null); // State to track pagination cursor
   const [hasMoreFiles, setHasMoreFiles] = useState(true); // To check if there are more files to load
   const [showModal, setShowModal] = useState(false); // Modal state
   const [fileDetails, setFileDetails] = useState(null); // Store file details for modal
@@ -31,12 +32,14 @@ const FileViewer = ({ selectedFolder }) => {
   // Fetch files with pagination
   const fetchFiles = async (append = false) => {
     console.log("!selectedFolder", selectedFolder);
+   
     if (selectedFolder === "Home") {
       setIsLoading(true);
       // Fetch root files when no folder is selected (Home view)
       const { resources, next_cursor } = await rootResourcesWithPagination(maxsize,nextCursor);
       setFiles(append ? [...files, ...resources] : resources);
-
+      nextCursor=next_cursor; 
+      setHasMoreFiles(!!next_cursor);
       setIsLoading(false);
     } else {
       setIsLoading(true);
@@ -47,7 +50,8 @@ const FileViewer = ({ selectedFolder }) => {
           nextCursor // Pass the current cursor for pagination
         );
         setFiles(append ? [...files, ...resources] : resources);
-        setNextCursor(next_cursor); // Update next cursor
+        nextCursor=next_cursor; // Update next cursor
+       // setNextCursor(next_cursor); // Update next cursor
         setHasMoreFiles(!!next_cursor); // Check if more files exist
       } catch (error) {
         console.error("Error fetching files:", error);
@@ -56,6 +60,7 @@ const FileViewer = ({ selectedFolder }) => {
     }
   };
   useEffect(() => {
+    nextCursor=null;
     fetchFiles();
   }, [selectedFolder]);
 
