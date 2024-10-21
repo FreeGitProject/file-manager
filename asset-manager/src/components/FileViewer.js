@@ -202,168 +202,164 @@ const FileViewer = ({ selectedFolder }) => {
     setDropdownOpen(dropdownOpen === assetId ? null : assetId); // Toggle dropdown for each file
   };
   return (
-    <div>
-      {isLoading ? (
-        // <p>Loading files...</p>
-        <LoadingSpinner />
-      ) : (
-        <div>
-          {/* Header Section */}
-          <div className="flex flex-wrap-reverse items-center justify-between mb-6">
-            <div className="w-full md:w-auto mb-4 md:mb-0">
-              {/* File Upload Form */}
-              <form
-                onSubmit={handleFileUpload}
-                className="flex items-center space-x-2"
+    <div className="flex flex-col h-full">
+      {/* Header Section */}
+      <div className="flex flex-wrap-reverse items-center justify-between mb-6 sticky top-0 bg-white border-b">
+        <div className="w-full md:w-auto mb-4 md:mb-0">
+          {/* File Upload Form */}
+          <form
+            onSubmit={handleFileUpload}
+            className="flex items-center space-x-2"
+          >
+            <input
+              type="file"
+              onChange={handleFileChange}
+              className="border border-gray-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <button
+              type="submit"
+              className="bg-blue-500 text-white p-2 rounded-md hover:bg-blue-600 transition disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={isUploading}
+            >
+              {isUploading ? "Uploading..." : "Upload Image"}
+            </button>
+          </form>
+        </div>
+
+        <div className="w-full md:w-auto mb-4 md:mb-0">
+          {/* Search Form */}
+          <form
+            onSubmit={handleSearchSubmit}
+            className="flex items-center space-x-2"
+          >
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={handleSearchChange}
+              placeholder="Search by filename or public ID"
+              className="border border-gray-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full md:w-64"
+            />
+            <button
+              type="submit"
+              className="bg-blue-500 text-white p-2 rounded-md hover:bg-blue-600 transition"
+            >
+              Search
+            </button>
+          </form>
+        </div>
+
+        <div className="w-full md:w-auto">
+          <h3 className="text-2xl font-bold text-gray-800">
+            Files in {selectedFolder || "Home"}
+          </h3>
+        </div>
+      </div>
+
+      {/* Files Section */}
+      <div className="flex-1 overflow-y-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-4">
+          {files?.length > 0 ? (
+            files.map((file) => (
+              <div
+                key={file.asset_id}
+                className="border rounded-lg shadow-lg p-5 flex flex-col items-center bg-white transition-transform transform hover:scale-105"
               >
-                <input
-                  type="file"
-                  onChange={handleFileChange}
-                  className="border border-gray-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-                <button
-                  type="submit"
-                  className="bg-blue-500 text-white p-2 rounded-md hover:bg-blue-600 transition disabled:opacity-50 disabled:cursor-not-allowed"
-                  disabled={isUploading}
-                >
-                  {isUploading ? "Uploading..." : "Upload Image"}
-                </button>
-              </form>
-            </div>
-
-            <div className="w-full md:w-auto mb-4 md:mb-0">
-              {/* Search Form */}
-              <form
-                onSubmit={handleSearchSubmit}
-                className="flex items-center space-x-2"
-              >
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={handleSearchChange}
-                  placeholder="Search by filename or public ID"
-                  className="border border-gray-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full md:w-64"
-                />
-                <button
-                  type="submit"
-                  className="bg-blue-500 text-white p-2 rounded-md hover:bg-blue-600 transition"
-                >
-                  Search
-                </button>
-              </form>
-            </div>
-
-            <div className="w-full md:w-auto">
-              <h3 className="text-2xl font-bold text-gray-800">
-                Files in {selectedFolder || "Home"}
-              </h3>
-            </div>
-          </div>
-          <br />
-          {/* Files Section */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {files?.length > 0 ? (
-              files.map((file) => (
-                <div
-                  key={file.asset_id}
-                  className="border rounded-lg shadow-lg p-5 flex flex-col items-center bg-white transition-transform transform hover:scale-105"
-                >
-                  {/* File Thumbnail or Icon */}
-                  {file.format === "pdf" ? (
-                    <div className="flex justify-center items-center h-40">
-                      <FaFilePdf className="text-red-500 text-6xl mb-4" />
-                    </div>
-                  ) : file.format === "xlsx" || file.format === "xls" ? (
-                    <div className="flex justify-center items-center h-40">
-                      <FaFileExcel className="text-green-500 text-6xl mb-4" />
-                    </div>
-                  ) : (
-                    <img
-                      src={file.secure_url}
-                      alt={file.public_id}
-                      className="w-full h-40 object-cover rounded mb-4 shadow-md"
-                    />
-                  )}
-                  <div className="w-full">
-                    {/* File Name */}
-                    <h4 className="text-xl font-semibold text-start mb-2">
-                      {file.public_id
-                        ? file.public_id.split("/").pop().trim()
-                        : "Unnamed File"}
-                    </h4>
-
-                    {/* Folder and Format on the same line, justified between */}
-                    <div className="flex justify-between text-sm text-gray-500">
-                      <p>{file.folder}</p>
-                      <p>{file.format}</p>
-                    </div>
+                {/* File Thumbnail or Icon */}
+                {file.format === "pdf" ? (
+                  <div className="flex justify-center items-center h-40">
+                    <FaFilePdf className="text-red-500 text-6xl mb-4" />
                   </div>
+                ) : file.format === "xlsx" || file.format === "xls" ? (
+                  <div className="flex justify-center items-center h-40">
+                    <FaFileExcel className="text-green-500 text-6xl mb-4" />
+                  </div>
+                ) : (
+                  <img
+                    src={file.secure_url}
+                    alt={file.public_id}
+                    className="w-full h-40 object-cover rounded mb-4 shadow-md"
+                  />
+                )}
+                <div className="w-full">
+                  {/* File Name */}
+                  <h4 className="text-xl font-semibold text-start mb-2">
+                    {file.public_id
+                      ? file.public_id.split("/").pop().trim()
+                      : "Unnamed File"}
+                  </h4>
 
-                  {/* MoreVertical Icon and Dropdown */}
-                  <div className="absolute top-2 right-2">
-                    <MoreVertical
-                      className="h-6 w-6 cursor-pointer"
-                      onClick={() => toggleDropdown(file.asset_id)}
-                    />
-                    {dropdownOpen === file.asset_id && (
-                      <div className="absolute top-8 right-0 w-32 bg-white border rounded shadow-lg z-10">
-                        <ul>
-                          <li
-                            className="p-2 hover:bg-gray-100 cursor-pointer"
-                            onClick={() => {
-                              setRenamingFileId(file.asset_id);
-                              setRenamingFileName(
-                                file.public_id.split("/").pop().trim()
-                              );
-                              setDropdownOpen(null); // Close dropdown
-                            }}
-                          >
-                            Rename
-                          </li>
-                          <li
-                            className="p-2 hover:bg-gray-100 cursor-pointer"
-                            onClick={() => {
-                              handleShowDetails(file.asset_id);
-                              setDropdownOpen(null); // Close dropdown
-                            }}
-                          >
-                            View Details
-                          </li>
-                          <li
-                            className="p-2 hover:bg-gray-100 cursor-pointer text-red-500"
-                            onClick={() => {
-                              handleDeleteFile(file.public_id);
-                              setDropdownOpen(null); // Close dropdown
-                            }}
-                          >
-                            Delete
-                          </li>
-                        </ul>
-                      </div>
-                    )}
+                  {/* Folder and Format on the same line, justified between */}
+                  <div className="flex justify-between text-sm text-gray-500">
+                    <p>{file.folder}</p>
+                    <p>{file.format}</p>
                   </div>
                 </div>
-              ))
-            ) : (
-              <p className="text-gray-500 text-center">
-                No files found in this folder.
-              </p>
-            )}
-          </div>
 
-          {/* Pagination Control */}
-          {hasMoreFiles && (
-            <div className="mt-4 text-center">
-              <button
-                onClick={loadMoreFiles}
-                className="bg-blue-500 text-white p-2 rounded"
-              >
-                {isLoading ? "Loading more..." : "Load More Files"}
-              </button>
-            </div>
+                {/* MoreVertical Icon and Dropdown */}
+                <div className="absolute top-2 right-2">
+                  <MoreVertical
+                    className="h-6 w-6 cursor-pointer"
+                    onClick={() => toggleDropdown(file.asset_id)}
+                  />
+                  {dropdownOpen === file.asset_id && (
+                    <div className="absolute top-8 right-0 w-32 bg-white border rounded shadow-lg z-10">
+                      <ul>
+                        <li
+                          className="p-2 hover:bg-gray-100 cursor-pointer"
+                          onClick={() => {
+                            setRenamingFileId(file.asset_id);
+                            setRenamingFileName(
+                              file.public_id.split("/").pop().trim()
+                            );
+                            setDropdownOpen(null); // Close dropdown
+                          }}
+                        >
+                          Rename
+                        </li>
+                        <li
+                          className="p-2 hover:bg-gray-100 cursor-pointer"
+                          onClick={() => {
+                            handleShowDetails(file.asset_id);
+                            setDropdownOpen(null); // Close dropdown
+                          }}
+                        >
+                          View Details
+                        </li>
+                        <li
+                          className="p-2 hover:bg-gray-100 cursor-pointer text-red-500"
+                          onClick={() => {
+                            handleDeleteFile(file.public_id);
+                            setDropdownOpen(null); // Close dropdown
+                          }}
+                        >
+                          Delete
+                        </li>
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))
+          ) : (
+            <p className="text-gray-500 text-center">
+             No files found in this folder.
+            </p>
           )}
         </div>
-      )}
+
+        {/* Pagination Control */}
+        {hasMoreFiles && (
+          <div className="mt-4 text-center">
+            <button
+              onClick={loadMoreFiles}
+              className="bg-blue-500 text-white p-2 rounded"
+            >
+              {isLoading ? <LoadingSpinner /> : "Load More Files"}
+            </button>
+          </div>
+        )}
+      </div>
+
       {/* Rename Modal */}
       {renamingFileId && (
         <RenameFileModal
