@@ -368,7 +368,7 @@ const FileViewer = ({ selectedFolder }) => {
           <div className="mt-4 text-center">
             <button
               onClick={loadMoreFiles}
-              className="bg-blue-500 text-white p-2 rounded"
+              className={`${isLoadingMore ? '':'bg-blue-500'} text-white p-2 rounded`}
               disabled={isLoadingMore} // Disable button when loading more
             >
               {isLoadingMore ? <LoadingSpinner /> : "Load More Files"}
