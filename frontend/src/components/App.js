@@ -5,22 +5,23 @@ import FileUpload from './FileUpload';
 import FileList from './FileList';
 import { fetchFiles } from '../services/api';
 import FileManager from './FileManager';
+import AssetManager from './AssetManager/AssetManager';
 
 const App = () => {
-    const [files, setFiles] = useState([]);
+    // const [files, setFiles] = useState([]);
 
-    const loadFiles = async () => {
-        try {
-            const fetchedFiles = await fetchFiles();
-            setFiles(fetchedFiles); // Update state with fetched files
-        } catch (error) {
-            console.error('Error loading files:', error);
-        }
-    };
+    // const loadFiles = async () => {
+    //     try {
+    //         const fetchedFiles = await fetchFiles();
+    //         setFiles(fetchedFiles); // Update state with fetched files
+    //     } catch (error) {
+    //         console.error('Error loading files:', error);
+    //     }
+    // };
 
-    useEffect(() => {
-        loadFiles(); // Load files when the component mounts
-    }, []);
+    // useEffect(() => {
+    //     loadFiles(); // Load files when the component mounts
+    // }, []);
 
     return (
         // <div>
@@ -29,7 +30,8 @@ const App = () => {
         //     <FileList files={files} onFileDeleted={loadFiles} />
         // </div>
         <div className="App">
-        <FileManager />
+        {/* <FileManager /> */}
+        <AssetManager/>
     </div>
     );
 };

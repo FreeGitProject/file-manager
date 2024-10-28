@@ -15,8 +15,8 @@ const AssetManager = () => {
   }, [selectedFolder]);
 
   return (
-    <div className="flex">
-      <div className="w-1/3 p-4 border-r">
+    <div className="flex h-screen bg-background">
+      <div className="w-1/4 border-r p-4">
         <FolderTree onSelectFolder={handleFolderSelect} />
       </div>
       <div className="w-2/3 p-4">

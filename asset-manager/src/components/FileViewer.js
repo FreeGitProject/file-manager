@@ -1,13 +1,21 @@
-import React, { useState, useEffect } from "react";
 import {
-  getResourcesByFolderPath,
+  getResourcesByPaginationFolderPath,
   uploadImageToFolder,
   deleteFileByPublicId,
-  rootResources,
+  rootResourcesWithPagination,
   searchResources,
-  renameFileById, // Import your rename function here
-} from "../services/api"; // Import rootResources API
+  renameFileById,
+  getFileDetailsByAssetId, // Import the API to get file details
+} from "../services/api";
+import FileDetailModal from "./FileDetailModal";
+import { LoadingSpinner } from "./Loader/LoadingSpinner";
+import RenameFileModal from "./RenameFileModal";
+import { MoreVertical } from "lucide-react";
+import React, { useState, useEffect } from "react";
 import { FaFilePdf, FaFileExcel } from "react-icons/fa";
+
+const maxsize = 6;
+let nextCursor = null;
 
 const FileViewer = ({ selectedFolder }) => {
   const [files, setFiles] = useState([]);
@@ -15,29 +23,69 @@ const FileViewer = ({ selectedFolder }) => {
   const [isUploading, setIsUploading] = useState(false); // Uploading state
   const [isDeleting, setIsDeleting] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [searchQuery, setSearchQuery] = useState(""); // For search query
-  const [newFileName, setNewFileName] = useState(""); // State for new file name
   const [renamingFileId, setRenamingFileId] = useState(null); // State for the file being renamed
+  const [renamingFileName, setRenamingFileName] = useState(""); // Store file name to rename
+  const [hasMoreFiles, setHasMoreFiles] = useState(false); // To check if there are more files to load
+  const [showModal, setShowModal] = useState(false); // Modal state
+  const [fileDetails, setFileDetails] = useState(null); // Store file details for modal
+  const [dropdownOpen, setDropdownOpen] = useState(null); // State for toggling dropdown per file
 
-  const fetchFiles = async () => {
-    console.log("!selectedFolder", selectedFolder);
-    if (selectedFolder === "Home") {
+  // Modify the fetchFiles function to use isLoading more clearly
+  const fetchFiles = async (append = false) => {
+    // Only set loading state if it's the initial fetch
+    if (!append) {
       setIsLoading(true);
-      // Fetch root files when no folder is selected (Home view)
-      const resources = await rootResources();
-      setFiles(resources);
-      setIsLoading(false);
     } else {
-      setIsLoading(true);
-      const resources = await getResourcesByFolderPath(selectedFolder);
-      setFiles(resources);
-      setIsLoading(false);
+      setIsLoadingMore(true); // Only if appending
+    }
+
+    try {
+      if (selectedFolder === "Home") {
+        const { resources, next_cursor } = await rootResourcesWithPagination(
+          maxsize,
+          nextCursor
+        );
+        setFiles(append ? [...files, ...resources] : resources);
+        nextCursor = next_cursor;
+        setHasMoreFiles(!!next_cursor);
+      } else {
+        const { resources, next_cursor } =
+          await getResourcesByPaginationFolderPath(
+            selectedFolder,
+            maxsize,
+            nextCursor
+          );
+        setFiles(append ? [...files, ...resources] : resources);
+        nextCursor = next_cursor;
+        setHasMoreFiles(!!next_cursor);
+        console.log(hasMoreFiles, "next_cursor", next_cursor);
+      }
+    } catch (error) {
+      console.error("Error fetching files:", error);
+    } finally {
+      // Only reset loading state if you were loading more
+      if (!append) {
+        setIsLoading(false);
+      } else {
+        setIsLoadingMore(false);
+      }
     }
   };
   useEffect(() => {
+    nextCursor = null;
     fetchFiles();
   }, [selectedFolder]);
 
+  // Load more files (next page)
+  const loadMoreFiles = async () => {
+    if (hasMoreFiles) {
+      //  setIsLoadingMore(true); // Set loading more state to true
+      await fetchFiles(true); // Fetch more files
+      //  setIsLoadingMore(false); // Reset loading more state
+    }
+  };
   // Handle file selection
   const handleFileChange = (e) => {
     setSelectedFile(e.target.files[0]);
@@ -51,27 +99,28 @@ const FileViewer = ({ selectedFolder }) => {
       alert("Please select a file and folder.");
       return;
     }
-    //here set selectedFolder root directory folder ""
-    // if (selectedFolder === "Home") selectedFolder = "";
-
     setIsUploading(true); // Set uploading state to true
     const formData = new FormData();
     formData.append("image", selectedFile); // Append selected image file
-    // formData.append("folder", selectedFolder); // Append folder name
-
     try {
       // Pass the folder as a query parameter in the URL
       const response = await uploadImageToFolder(formData, selectedFolder);
       if (response.success) {
+        nextCursor = null;
         // Reload files after successful upload
         alert(response.message);
         console.log(selectedFolder, "selectedFolderupload");
         if (selectedFolder === "Home") {
           // Fetch root files when no folder is selected (Home view)
-          const resources = await rootResources();
+          const { resources } = await rootResourcesWithPagination(
+            5,
+            nextCursor
+          );
           setFiles(resources);
         } else {
-          const resources = await getResourcesByFolderPath(selectedFolder);
+          const { resources } = await getResourcesByPaginationFolderPath(
+            selectedFolder
+          );
           setFiles(resources);
         }
         setSelectedFile(null); // Reset selected file
@@ -131,166 +180,219 @@ const FileViewer = ({ selectedFolder }) => {
       await fetchFiles();
     }
   };
-// Handle file renaming
-const handleRenameFile = async (fileId) => {
-  if (!newFileName) {
-    alert("Please enter a new file name.");
-    return;
-  }
 
-  try {
-    const response = await renameFileById(fileId, newFileName); // API call to rename file
-    if (response.success) {
-      alert("File renamed successfully");
-      fetchFiles(); // Reload files after renaming
-      setNewFileName(""); // Clear the input field
-      setRenamingFileId(null); // Clear renaming state
-    } else {
-      alert("Error renaming file");
+  // Handle renaming logic
+  const handleRenameFile = async (fileId, newFileName) => {
+    try {
+      const response = await renameFileById(fileId, newFileName); // API call to rename file
+      if (response.success) {
+        alert("File renamed successfully");
+        nextCursor = null;
+        fetchFiles(); // Reload files after renaming
+        setRenamingFileId(null); // Close rename modal
+      } else {
+        alert("Error renaming file");
+      }
+    } catch (error) {
+      console.error("Error renaming file:", error);
+      alert("An error occurred while renaming the file.");
     }
-  } catch (error) {
-    console.error("Error renaming file:", error);
-    alert("An error occurred while renaming the file.");
-  }
-};
-  return (
-    <div>
-      {isLoading ? (
-        <p>Loading files...</p>
-      ) : (
-        <div>
-          <h3 className="text-2xl font-bold mb-4">
-            Files in {selectedFolder || "Home"}
-          </h3>
+  };
 
+  // Handle showing the modal with file details
+  const handleShowDetails = async (assetId) => {
+    try {
+      const details = await getFileDetailsByAssetId(assetId); // Fetch file details by asset_id
+      setFileDetails(details.data); // Store the details for the modal
+      setShowModal(true); // Show the modal
+    } catch (error) {
+      console.error("Error fetching file details:", error);
+    }
+  };
+  const toggleDropdown = (assetId) => {
+    setDropdownOpen(dropdownOpen === assetId ? null : assetId); // Toggle dropdown for each file
+  };
+  return (
+    <div className="flex flex-col h-full">
+      {/* Header Section */}
+      <div className="flex flex-wrap-reverse items-center justify-between mb-6 sticky top-0 bg-white border-b">
+        <div className="w-full md:w-auto mb-4 md:mb-0">
           {/* File Upload Form */}
-          <form onSubmit={handleFileUpload} className="mb-4">
+          <form
+            onSubmit={handleFileUpload}
+            className="flex items-center space-x-2"
+          >
             <input
               type="file"
               onChange={handleFileChange}
-              className="border p-2 rounded mr-2"
+              className="border border-gray-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
             <button
               type="submit"
-              className="bg-blue-500 text-white p-2 rounded"
+              className="bg-blue-500 text-white p-2 rounded-md hover:bg-blue-600 transition disabled:opacity-50 disabled:cursor-not-allowed"
               disabled={isUploading}
             >
               {isUploading ? "Uploading..." : "Upload Image"}
             </button>
           </form>
+        </div>
+
+        <div className="w-full md:w-auto mb-4 md:mb-0">
           {/* Search Form */}
-          <form onSubmit={handleSearchSubmit} className="mb-4">
+          <form
+            onSubmit={handleSearchSubmit}
+            className="flex items-center space-x-2"
+          >
             <input
               type="text"
               value={searchQuery}
               onChange={handleSearchChange}
               placeholder="Search by filename or public ID"
-              className="border p-2 rounded mr-2"
+              className="border border-gray-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full md:w-64"
             />
             <button
               type="submit"
-              className="bg-blue-500 text-white p-2 rounded"
+              className="bg-blue-500 text-white p-2 rounded-md hover:bg-blue-600 transition"
             >
               Search
             </button>
           </form>
+        </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {files?.length > 0 ? (
-              files.map((file) => (
-                <div
-                  key={file.asset_id}
-                  className="border rounded-lg shadow-md p-4 flex flex-col items-center"
-                >
-                  {/* File Thumbnail or Icon */}
-                  {file.format === "pdf" ? (
-                    <div className="flex justify-center items-center h-40">
-                      <FaFilePdf className="text-red-500 text-6xl mb-2" />
-                    </div>
-                  ) : file.format === "xlsx" || file.format === "xls" ? (
-                    <div className="flex justify-center items-center h-40">
-                      <FaFileExcel className="text-green-500 text-6xl mb-2" />
-                    </div>
-                  ) : (
-                    <img
-                      src={file.secure_url}
-                      alt={file.public_id}
-                      className="w-full h-40 object-cover rounded mb-2"
-                    />
-                  )}
+        <div className="w-full md:w-auto">
+          <h3 className="text-2xl font-bold text-gray-800">
+            Files in {selectedFolder || "Home"}
+          </h3>
+        </div>
+      </div>
 
-                  <h4 className="text-xl font-semibold mb-2 text-center">
+      {/* Files Section */}
+      <div className="flex-1 overflow-y-auto p-4">
+        {isLoading ? (
+          <LoadingSpinner /> // Show spinner while loading files
+        ) : files?.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {files.map((file) => (
+              <div
+                key={file.asset_id}
+                className="border rounded-lg shadow-lg p-5 flex flex-col items-center bg-white transition-transform transform hover:scale-105 relative"
+              >
+                {/* File Thumbnail or Icon */}
+                {file.format === "pdf" ? (
+                  <div className="flex justify-center items-center h-40">
+                    <FaFilePdf className="text-red-500 text-6xl mb-4" />
+                  </div>
+                ) : file.format === "xlsx" || file.format === "xls" ? (
+                  <div className="flex justify-center items-center h-40">
+                    <FaFileExcel className="text-green-500 text-6xl mb-4" />
+                  </div>
+                ) : (
+                  <img
+                    src={file.secure_url}
+                    alt={file.public_id}
+                    className="w-full h-40 object-cover rounded mb-4 shadow-md"
+                  />
+                )}
+
+                <div className="w-full">
+                  {/* File Name */}
+                  <h4 className="text-xl font-semibold text-start mb-2">
                     {file.public_id
                       ? file.public_id.split("/").pop().trim()
                       : "Unnamed File"}
                   </h4>
-                  <p className="text-gray-600 text-center">
-                    Size: {Math.round(file.bytes / 1024)} KB
-                  </p>
-                  <p className="text-gray-600 text-center">
-                    Folder: {file.folder}
-                  </p>
-                  <p className="text-gray-600 text-center">
-                    Format: {file.format}
-                  </p>
-                  <a
-                    href={file.secure_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-blue-600 hover:underline mt-2 block text-center"
-                  >
-                    View File
-                  </a>
-                  <button
-                    onClick={() => {
-                      setRenamingFileId(file.asset_id); // Set the file ID to be renamed
-                      setNewFileName(file.public_id.split("/").pop().trim()); // Set current name for editing
-                    }}
-                    className="bg-yellow-500 text-white p-2 rounded mt-2"
-                  >
-                    Rename File
-                  </button>
-                  <button
-                    onClick={() => handleDeleteFile(file.public_id)}
-                    className="bg-red-500 text-white p-2 rounded mt-2"
-                    disabled={isDeleting}
-                  >
-                    {isDeleting ? "Deleting..." : "Delete File"}
-                  </button>
+
+                  {/* Folder and Format on the same line, justified between */}
+                  <div className="flex justify-between text-sm text-gray-500">
+                    <p>{file.folder || "No Folder"}</p>
+                    <p>{file.format}</p>
+                  </div>
                 </div>
-              ))
-            ) : (
-              <p className="text-gray-600">No files found in this folder.</p>
-            )}
+
+                {/* MoreVertical Icon and Dropdown */}
+                <div className="absolute top-2 right-2">
+                  <MoreVertical
+                    className="h-6 w-6 cursor-pointer"
+                    onClick={() => toggleDropdown(file.asset_id)}
+                  />
+                  {dropdownOpen === file.asset_id && (
+                    <div className="absolute top-8 right-0 w-32 bg-white border rounded shadow-lg z-10">
+                      <ul>
+                        <li
+                          className="p-2 hover:bg-gray-100 cursor-pointer"
+                          onClick={() => {
+                            setRenamingFileId(file.asset_id);
+                            setRenamingFileName(
+                              file.public_id.split("/").pop().trim()
+                            );
+                            setDropdownOpen(null); // Close dropdown
+                          }}
+                        >
+                          Rename
+                        </li>
+                        <li
+                          className="p-2 hover:bg-gray-100 cursor-pointer"
+                          onClick={() => {
+                            handleShowDetails(file.asset_id);
+                            setDropdownOpen(null); // Close dropdown
+                          }}
+                        >
+                          View Details
+                        </li>
+                        <li
+                          className="p-2 hover:bg-gray-100 cursor-pointer text-red-500"
+                          onClick={() => {
+                            handleDeleteFile(file.public_id);
+                            setDropdownOpen(null); // Close dropdown
+                          }}
+                        >
+                          Delete
+                        </li>
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
           </div>
-          {/* Renaming Input */}
-          {renamingFileId && (
-            <div className="mt-4">
-              <input
-                type="text"
-                value={newFileName}
-                onChange={(e) => setNewFileName(e.target.value)}
-                placeholder="Enter new file name"
-                className="border p-2 rounded mr-2"
-              />
-              <button
-                onClick={() => handleRenameFile(renamingFileId)}
-                className="bg-blue-500 text-white p-2 rounded"
-              >
-                Rename
-              </button>
-              <button
-                onClick={() => {
-                  setRenamingFileId(null); // Cancel renaming
-                  setNewFileName(""); // Clear input
-                }}
-                className="bg-gray-300 text-black p-2 rounded ml-2"
-              >
-                Cancel
-              </button>
-            </div>
-          )}
-        </div>
+        ) : (
+          <div className="flex justify-center items-center h-96">
+            <p className="text-gray-500 text-center">
+              No files found in this folder.
+            </p>
+          </div>
+        )}
+
+        {/* Pagination Control */}
+        {hasMoreFiles && (
+          <div className="mt-4 text-center">
+            <button
+              onClick={loadMoreFiles}
+              className={`${isLoadingMore ? '':'bg-blue-500'} text-white p-2 rounded`}
+              disabled={isLoadingMore} // Disable button when loading more
+            >
+              {isLoadingMore ? <LoadingSpinner /> : "Load More Files"}
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* Rename Modal */}
+      {renamingFileId && (
+        <RenameFileModal
+          currentName={renamingFileName}
+          fileId={renamingFileId}
+          onRename={handleRenameFile}
+          onClose={() => setRenamingFileId(null)} // Close modal
+        />
+      )}
+
+      {/* Modal to show file details */}
+      {showModal && fileDetails && (
+        <FileDetailModal
+          fileDetails={fileDetails}
+          onClose={() => setShowModal(false)}
+        />
       )}
     </div>
   );
