@@ -1,6 +1,7 @@
 import axios from "axios";
 
-const API_BASE_URL = "http://localhost:5000/api/files";
+//const API_BASE_URL = "http://localhost:5000/api/files";
+const API_BASE_URL = "https://file-manager-oebu.onrender.com/api/files";
 
 // Fetch root folders
 export const getRootFolders = async () => {
